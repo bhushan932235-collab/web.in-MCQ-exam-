@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🔥 Fire Engineering MCQ Exam</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Poppins", sans-serif;
+    background: #fff6f0;
+    margin: 0;
+    padding: 0;
+  }
+  header {
+    text-align: center;
+    background: linear-gradient(90deg, #ff6b00, #ff914d);
+    color: white;
+    padding: 20px;
+    font-size: 26px;
+    font-weight: bold;
+    position: relative;
+  }
+  #floatingTimer {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: #ff6b00;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 18px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    z-index: 9999;
+  }
+  .exam-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  .question {
+    margin-bottom: 25px;
+    padding: 15px;
+    border: 1px solid #f0f0f0;
+    border-radius: 10px;
+  }
+  .question h3 { margin-bottom: 10px; color: #333; }
+  label { display: block; margin-bottom: 5px; cursor: pointer; }
+  button {
+    background: linear-gradient(90deg, #ff6b00, #ff914d);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: block;
+    margin: 20px auto;
+    transition: 0.3s;
+  }
+  button:hover { transform: scale(1.03); }
+
+  /* Result Page */
+  .result-container {
+    max-width: 700px;
+    margin: 50px auto;
+    background: #fff;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    display: none;
+  }
+  .header {
+    background: linear-gradient(90deg, #ff6b00, #ff914d);
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  .tabs {
+    display: flex;
+    justify-content: space-around;
+    border-bottom: 2px solid #eee;
+  }
+  .tab {
+    padding: 12px 20px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .tab.active {
+    color: #ff6b00;
+    border-bottom: 3px solid #ff6b00;
+  }
+  .content { padding: 30px; display: none; }
+  .content.active { display: block; }
+  .score-section {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 30px;
+    flex-wrap: wrap;
+  }
+  .circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 5px solid #ff6b00;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .circle-label { text-align: center; font-size: 14px; color: #666; }
+  .rank {
+    background: #fff5e6;
+    color: #ff6b00;
+    padding: 12px;
+    text-align: center;
+    border-radius: 8px;
+    margin-top: 25px;
+    font-weight: 500;
+  }
+  .wrong-item {
+    background: #fff3f3;
+    border-left: 5px solid #ff4d4d;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 6px;
+  }
+</style>
+</head>
+<body>
+<header>🔥 Fire Engineering MCQ Exam</header>
+<div id="floatingTimer">⏱️ 00:00:00</div>
+
+<div class="exam-container" id="exam">
+  <form id="examForm">
+    <div id="questions"></div>
+    <button type="submit">Submit Exam</button>
+  </form>
+</div>
+
+<div class="result-container" id="resultPage">
+  <div class="header">🔥 Fire Engineering Exam Result</div>
+  <div class="tabs">
+    <div class="tab active" onclick="openTab(event, 'result')">Test Result</div>
+    <div class="tab" onclick="openTab(event, 'wrong')">Wrong Questions ❓</div>
+    <div class="tab" onclick="openTab(event, 'rank')">Rank List</div>
+  </div>
+
+  <div id="result" class="content active">
+    <div class="score-section">
+      <div>
+        <div class="circle" id="scorePercent">0%</div>
+        <div class="circle-label">Score Ratio</div>
+      </div>
+      <div>
+        <div class="circle" id="scoreValue">0/100</div>
+        <div class="circle-label">Score</div>
+      </div>
+      <div>
+        <div class="circle" id="timeTaken">0s</div>
+        <div class="circle-label">Total Time</div>
+      </div>
+    </div>
+    <div class="rank" id="rankMsg"></div>
+  </div>
+
+  <div id="wrong" class="content"></div>
+
+  <div id="rank" class="content">
+    <p>1. You — <span id="rankScore"></span>%</p>
+    <p>2. Student B — 92%</p>
+    <p>3. Student C — 85%</p>
+  </div>
+</div>
+
+<script>
+const questionsData = [];
+// 100 Fire Engineering MCQs 
+const questionSet = [
+  // Unit I – Basics of Fire Science – I
+  ["Which of the following elements is not part of the fire triangle?", ["Heat", "Fuel", "Chemical Reaction", "Oxygen"], 2],
+  ["Water is not suitable as an extinguishing agent for:", ["Wood fire", "Electrical fire", "Paper fire", "Cotton fire"], 1],
+  ["Which of the following extinguishing media works primarily by chain inhibition?", ["Foam", "Dry Chemical Powder", "Water", "CO₂"], 1],
+  ["The “incipient stage” of fire corresponds to:", ["Full-developed burning", "Smouldering with no flame", "Initial ignition with localized flame", "Cooling phase"], 2],
+  ["Fire extinguishing by “blanketing” primarily interrupts:", ["Heat transfer", "Fuel supply", "Oxygen supply", "Chain reaction"], 2],
+  ["The classification of fires as per Indian Standards (IS:2190) is based on:", ["Type of structure", "Source of ignition", "Type of fuel involved", "Intensity of flame"], 2],
+  ["The property of water that makes it an effective extinguishing agent is:", ["High viscosity", "High latent heat of vaporization", "Low specific heat", "Low density"], 1],
+  ["Fire extinguishing by cooling primarily affects:", ["Oxygen leg of triangle", "Fuel leg of triangle", "Heat leg of triangle", "Chain reaction"], 2],
+  ["The most effective cooling agent among the following is:", ["CO₂", "Water", "Sand", "Foam"], 1],
+  ["Atoms and molecules in combustion are primarily involved in:", ["Physical change", "Nuclear reaction", "Chemical reaction", "Thermal expansion"], 2],
+
+  // Unit II – Basics of Fire Science – II
+  ["The fourth element of the fire tetrahedron is:", ["Oxygen", "Chemical chain reaction", "Fuel", "Ignition source"], 1],
+  ["Which type of chemical reaction liberates heat energy?", ["Endothermic", "Exothermic", "Neutralization", "Photochemical"], 1],
+  ["Which gas acts as an inhibitor in chain reactions of combustion?", ["CO₂", "Argon", "Halon", "Nitrogen"], 2],
+  ["Combustion of hydrogen with oxygen is an example of:", ["Endothermic reaction", "Exothermic reaction", "Thermal decomposition", "Photolysis"], 1],
+  ["Uninhibited chain reactions in fires are mainly caused by:", ["Metal oxides", "Free radicals", "Stable molecules", "Neutral species"], 1],
+  ["The most common cause of industrial fire is:", ["Static electricity", "Lightning", "Electrical short-circuit", "Overheating of metals"], 2],
+  ["Which of the following prevents fire by interrupting the chemical chain reaction?", ["Foam blanket", "Water jet", "Dry powder extinguisher", "CO₂ flooding"], 2],
+  ["The tetrahedron of fire replaces the triangle by including:", ["Airflow", "Free radical chain reaction", "Heat of formation", "Flash point"], 1],
+  ["A free radical is best defined as:", ["Electrically charged atom", "Stable molecule", "Atom with an unpaired electron", "Ion"], 2],
+  ["Endothermic reactions during fire tend to:", ["Release heat", "Absorb heat", "Maintain same energy", "Convert solids to gases"], 1],
+
+  // Unit III – Combustion
+  ["The process of burning in presence of oxygen is called:", ["Oxidation", "Combustion", "Pyrolysis", "Incineration"], 1],
+  ["Auto-ignition temperature of a fuel is:", ["Lowest temperature to start combustion by spark", "Highest temperature for vaporization", "Temperature at which fuel ignites spontaneously without external flame", "Melting point of the fuel"], 2],
+  ["Flash point is defined as:", ["Temperature at which fuel starts evaporating", "Lowest temperature at which vapors ignite momentarily", "Temperature of sustained burning", "Point where auto-ignition occurs"], 1],
+  ["The explosive range of gasoline vapors in air is approximately:", ["1–3%", "1.4–7.6%", "2–10%", "10–25%"], 1],
+  ["Which of the following combustion processes is flameless?", ["Diffusion flame", "Smouldering combustion", "Pre-mixed flame", "Turbulent flame"], 1],
+  ["Catalyst in combustion:", ["Raises ignition temperature", "Slows down reaction", "Increases rate without being consumed", "Acts as reactant"], 2],
+  ["Which is not a type of combustion?", ["Rapid combustion", "Spontaneous combustion", "Explosive combustion", "Electrostatic combustion"], 3],
+  ["The latent heat of vaporization is important for:", ["Solid fuels", "Liquid fuels", "Gaseous fuels", "Inert gases"], 1],
+  ["The limit of flammability is defined as:", ["Range of pressure for combustion", "Temperature range of ignition", "Concentration range of fuel-air mixture for ignition", "Energy required for ignition"], 2],
+  ["Specific gravity affects fire spread because it:", ["Changes vapor density", "Alters flame temperature", "Influences ignition energy", "Affects conduction rate"], 0],
+
+  // Unit IV – Fire Resistance & Fire Load Concept
+  ["Fire resistance test determines:", ["Flash point", "Flame spread rate", "Duration a material resists standard fire", "Smoke density"], 2],
+  ["Fire load is expressed in:", ["BTU/m³", "Cal/m²", "MJ/m²", "Kcal/kg"], 2],
+  ["Factor not affecting fire resistance of structure:", ["Material density", "Moisture content", "Colour of surface", "Cross-section size"], 2],
+  ["The calorific value of fuel is defined as:", ["Energy required to ignite", "Energy liberated during combustion per kg", "Energy absorbed during heating", "Rate of combustion"], 1],
+  ["Fire load density helps in:", ["Measuring ventilation", "Grading occupancy hazard", "Determining CO₂ emission", "Calculating flash point"], 1],
+  ["Reaction to fire test is performed to measure:", ["Heat of reaction", "Smoke density and flame spread", "Flash point", "Ignition temperature"], 1],
+  ["Fire resistance of concrete increases with:", ["More steel content", "Low moisture", "High density", "Proper curing and thickness"], 3],
+  ["Occupancy classification is based primarily on:", ["Number of persons", "Fire load per unit area", "Ceiling height", "Type of ventilation"], 1],
+  ["The unit of calorific value is:", ["W/m²", "KJ/kg", "KJ/m³", "W/m"], 1],
+  ["A higher fire load indicates:", ["Less combustible content", "Greater potential heat release", "Lower risk", "Better fire resistance"], 1],
+
+  // Unit V – Transmission of Heat
+  ["The process of heat transfer without material movement is:", ["Convection", "Conduction", "Radiation", "Reflection"], 1],
+  ["Convection requires:", ["Solid medium", "Vacuum", "Fluid medium", "Metallic conductor"], 2],
+  ["Radiation heat transfer does not require:", ["Matter", "Space", "Energy", "Direction"], 0],
+  ["The SI unit of heat is:", ["Calorie", "Joule", "BTU", "Watt"], 1],
+  ["Specific heat is defined as:", ["Heat required to raise temperature of 1 kg by 1°C", "Heat required for melting", "Heat released during condensation", "None of the above"], 0],
+  ["The main risk of heat conduction in fire spread is:", ["Spark generation", "Temperature difference", "Metal expansion causing collapse", "Chemical reaction"], 2],
+  ["Volatile liquids are hazardous because of their:", ["High boiling point", "Low vapor pressure", "High vapor pressure and low flash point", "Non-reactivity"], 2],
+  ["The method of spontaneous heat generation without external heating is known as:", ["Pyrolysis", "Self-heating", "Thermolysis", "Oxidative fusion"], 1],
+  ["The rate of heat transfer by radiation is proportional to:", ["Temperature difference", "Cube of temperature", "Fourth power of absolute temperature", "Density"], 2],
+  ["BTU is equal to approximately:", ["1000 J", "1055 J", "4.18 J", "2000 J"], 1],
+
+  // Unit VI – Gas Laws
+  ["Boyle’s law states that for constant temperature:", ["P ∝ V", "PV = constant", "P/T = constant", "V/T = constant"], 1],
+  ["According to Charles’s law, at constant pressure:", ["Volume increases with temperature", "Pressure decreases with temperature", "Volume remains constant", "Volume decreases with temperature"], 0],
+  ["The general gas law is expressed as:", ["PV = RT", "PV = nRT", "P/V = RT", "PT = nR"], 1],
+  ["The coefficient of linear expansion for Invar is:", ["Very high", "Very low", "Equal to steel", "Negative"], 1],
+  ["Thermal expansion in metals occurs due to:", ["Increase in atomic mass", "Increase in atomic vibration", "Chemical oxidation", "Electron emission"], 1],
+  ["The gas law combining Boyle’s and Charles’s laws is:", ["Dalton’s", "Avogadro’s", "General gas law", "Ideal gas law"], 2],
+  ["Critical temperature is:", ["Lowest temperature for sublimation", "Temperature above which gas cannot liquefy", "Point where vapor pressure = 1 atm", "Melting point"], 1],
+  ["The expansion of solids in all directions is called:", ["Linear", "Cubical", "Superficial", "Volumetric"], 1],
+  ["Sublimation is the direct change of:", ["Solid to liquid", "Gas to solid", "Solid to gas", "Liquid to gas"], 2],
+  ["The coefficient of superficial expansion is approximately:", ["Twice linear expansion", "Half linear expansion", "Equal to linear expansion", "Three times linear expansion"], 0],
+
+  // Unit VI – Gas Laws (continued) + Integrated Questions
+  ["The volumetric expansion of liquids is generally:", ["Greater than that of solids", "Smaller than that of gases", "Equal to solids", "Negligible"], 0],
+  ["Thermostats operate on the principle of:", ["Chemical oxidation", "Thermal expansion of metals", "Pressure variation", "Radiation absorption"], 1],
+  ["The metal alloy Invar is primarily used where:", ["High thermal conductivity is required", "High strength at high temperature is needed", "Minimum expansion with temperature is desired", "Corrosion resistance is essential"], 2],
+  ["The law that defines relationship between gas pressure and absolute temperature is:", ["Boyle’s Law", "Gay-Lussac’s Law", "Avogadro’s Law", "Dalton’s Law"], 1],
+  ["The Kelvin scale is used in gas laws because:", ["It starts from 0°C", "It avoids negative temperatures", "It is a chemical unit", "It measures radiation energy"], 1],
+  ["When a gas is heated at constant pressure, its density will:", ["Increase", "Decrease", "Remain constant", "First increase then decrease"], 1],
+  ["Expansion of liquids is measured using:", ["Manometer", "Thermostat", "Dilatometer", "Calorimeter"], 2],
+  ["Sublimation occurs in:", ["Ice", "Naphthalene", "Both A and B", "Only metals"], 2],
+  ["Thermal expansion in materials can cause:", ["Reduced conduction", "Structural cracking", "Flame retardance", "Decreased pressure"], 1],
+  ["Which law forms the basis for calculating volume changes in gas due to temperature?", ["Charles’s Law", "Boyle’s Law", "Dalton’s Law", "Henry’s Law"], 0],
+
+  // Cross-unit Conceptual Questions (Applied + Integrated)
+  ["A fire in a transformer oil tank is classified as:", ["Class A", "Class B", "Class C", "Class D"], 1],
+  ["The fire that involves burning of magnesium or aluminum should be extinguished by:", ["CO₂ extinguisher", "Foam extinguisher", "Dry powder extinguisher", "Water jet"], 2],
+  ["Spontaneous combustion in oily rags occurs mainly due to:", ["Moisture absorption", "Slow oxidation releasing heat", "Radiation exposure", "Friction"], 1],
+  ["The reason foam extinguishers are ineffective on electrical fires is because:", ["They don’t cool", "They are non-conductors", "They conduct electricity", "They displace oxygen"], 2],
+  ["The temperature at which a fuel ignites without external flame is:", ["Flash point", "Fire point", "Auto-ignition temperature", "Latent heat point"], 2],
+  ["The chain reaction in a flame is primarily due to:", ["Ionized gases", "Free radicals", "Oxygen absorption", "Combustion by-products"], 1],
+  ["A material with high fire load but low fire resistance is considered:", ["Safe", "Very hazardous", "Self-extinguishing", "Non-flammable"], 1],
+  ["The fire resistance rating of a structural member is expressed in:", ["BTU", "°C", "Hours", "MJ/m²"], 2],
+  ["When metal expands upon heating, stress can be minimized by:", ["Rapid cooling", "Providing expansion joints", "Adding load", "Applying lubricant"], 1],
+  ["The principal mechanism of heat transfer through a building wall during a fire is:", ["Radiation", "Conduction", "Convection", "Reflection"], 1],
+
+  // Numerical/Reasoning-based Concept Questions
+  ["A gas occupies 4 L at 2 atm pressure. At constant temperature, its volume at 1 atm will be:", ["2 L", "4 L", "8 L", "6 L"], 2],
+  ["A material with calorific value 20 MJ/kg and mass 100 kg has fire load of:", ["2000 MJ", "200 MJ", "20 MJ", "2 MJ"], 0],
+  ["If heat is transferred from metal to air through vibration of molecules, it is called:", ["Convection", "Radiation", "Conduction", "Fusion"], 2],
+  ["Which of the following has the highest specific heat?", ["Copper", "Iron", "Water", "Lead"], 2],
+  ["The critical temperature for CO₂ is approximately:", ["0°C", "31°C", "100°C", "–78°C"], 1],
+  ["The endothermic process among the following is:", ["Condensation", "Melting of ice", "Combustion of coal", "Neutralization"], 1],
+  ["If the coefficient of linear expansion of steel is $12 \\times 10^{-6}$ /°C, for 100°C rise, 1 m rod expands by:", ["0.12 mm", "1.2 mm", "12 mm", "0.012 mm"], 0],
+  ["Heat transfer due to difference in density within a fluid is:", ["Radiation", "Conduction", "Convection", "Diffusion"], 2],
+  ["In a fire, radiant heat exposure is most dangerous because:", ["It causes dehydration", "It travels through vacuum", "It cools slowly", "It requires conduction medium"], 1],
+  ["Heat of fusion refers to:", ["Heat required for vaporization", "Heat required for solid to liquid conversion", "Heat lost during condensation", "Heat generated during combustion"], 1],
+
+  // Integrated Safety Concept Questions
+  ["Combustion efficiency depends mainly on:", ["Fuel composition and oxygen availability", "Room temperature", "Flame color", "Relative humidity"], 0],
+  ["The extinguishing method for metal fires involves:", ["Cooling", "Dilution", "Smothering with dry sand or powder", "Water flooding"], 2],
+  ["Which of the following will increase fire resistance of steel structure?", ["Increasing cross-section", "Removing insulation", "Applying thin paint layer", "Increasing load"], 0],
+  ["A BTU represents:", ["Energy required to raise 1 lb of water by 1°F", "Energy to melt 1 kg of ice", "Energy to raise 1 g water by 1°C", "None of these"], 0],
+  ["Flammable limits indicate:", ["Safe temperature of gases", "Oxygen percentage", "Range of fuel-air ratio that supports flame propagation", "Density of vapor"], 2],
+  ["The value of R (gas constant) in SI units is:", ["8.314 J/mol·K", "8.314 Cal/mol·K", "82.1 atm·L/mol·K", "1.0 J/mol·K"], 0],
+  ["The specific heat of a substance indicates:", ["Heat absorbed per mole", "Heat required to raise 1 kg by 1°C", "Energy per molecule", "Heat per liter"], 1],
+  ["The principal of conduction fire spread applies most critically to:", ["Steel columns", "Wooden doors", "Foam walls", "Glass windows"], 0],
+  ["The latent heat of vaporization of water is approximately:", ["$2260 \\text{ kJ/kg}$", "$500 \\text{ kJ/kg}$", "$1000 \\text{ kJ/kg}$", "$3200 \\text{ kJ/kg}$"], 0],
+  ["During a fire test, “flame spread” is used to evaluate:", ["Heat absorption capacity", "Rate of flame propagation over surface", "Smoke generation", "Gas temperature"], 1]
+];
+
+// This loop processes the 100 questions from the array above
+for (let q of questionSet) {
+  questionsData.push({q:q[0], a:q[1], correct:q[2]});
+}
+
+// render
+const questionsDiv=document.getElementById("questions");
+questionsData.forEach((q,i)=>{
+  let html=`<div class='question'><h3>${i+1}. ${q.q}</h3>`;
+  q.a.forEach((opt,idx)=>{
+    html+=`<label><input type='radio' name='q${i}' value='${idx}'> ${opt}</label>`;
+  });
+  html+="</div>";
+  questionsDiv.innerHTML+=html;
+});
+
+// floating timer
+let seconds=0;
+const timerEl=document.getElementById("floatingTimer");
+const timerInterval = setInterval(()=>{
+  seconds++;
+  const h=String(Math.floor(seconds/3600)).padStart(2,'0');
+  const m=String(Math.floor((seconds%3600)/60)).padStart(2,'0');
+  const s=String(seconds%60).padStart(2,'0');
+  timerEl.textContent=`⏱️ ${h}:${m}:${s}`;
+},1000);
+
+// result calc
+document.getElementById("examForm").addEventListener("submit",(e)=>{
+  e.preventDefault();
+  clearInterval(timerInterval); // Stop the timer on submit
+  const total=questionsData.length;
+  let correct=0;
+  const wrongList=document.getElementById("wrong");
+  wrongList.innerHTML="";
+  questionsData.forEach((q,i)=>{
+    const ans=document.querySelector(`input[name='q${i}']:checked`);
+    if(ans && parseInt(ans.value)===q.correct) correct++;
+    else{
+      const yourAns=ans? q.a[parseInt(ans.value)] :"Not Answered";
+      wrongList.innerHTML+=`
+        <div class="wrong-item">
+          <strong>Q${i+1}:</strong> ${q.q}<br>
+          ❌ <b>Your Answer:</b> ${yourAns}<br>
+          ✅ <b>Correct:</b> ${q.a[q.correct]}
+        </div>`;
+    }
+  });
+  const percent=Math.round((correct/total)*100);
+  document.getElementById("scorePercent").innerText=percent+"%";
+  document.getElementById("scoreValue").innerText=`${correct}/${total}`;
+  document.getElementById("timeTaken").innerText=`${Math.floor(seconds/60)}m ${seconds%60}s`;
+  document.getElementById("rankScore").innerText=percent;
+  document.getElementById("rankMsg"].innerText=percent===100?"You have scored full marks! Rank #1 🔥":`You scored ${percent}%. Keep improving!`;
+  document.getElementById("exam").style.display="none";
+  document.getElementById("floatingTimer").style.display="none"; // Hide timer on result page
+  document.getElementById("resultPage").style.display="block";
+});
+
+function openTab(evt,tabName){
+  document.querySelectorAll(".content").forEach(c=>c.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.getElementById(tabName).classList.add("active");
+  evt.currentTarget.classList.add("active");
+}
+</script>
+</body>
+</html>

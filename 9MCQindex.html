@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🔥 Fire Engineering MCQ Exam</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Poppins", sans-serif;
+    background: #fff6f0;
+    margin: 0;
+    padding: 0;
+  }
+  header {
+    text-align: center;
+    background: linear-gradient(90deg, #ff6b00, #ff914d);
+    color: white;
+    padding: 20px;
+    font-size: 26px;
+    font-weight: bold;
+    position: relative;
+  }
+  #floatingTimer {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: #ff6b00;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 18px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    z-index: 9999;
+  }
+  .exam-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  .question {
+    margin-bottom: 25px;
+    padding: 15px;
+    border: 1px solid #f0f0f0;
+    border-radius: 10px;
+  }
+  .question h3 { margin-bottom: 10px; color: #333; }
+  label { display: block; margin-bottom: 5px; cursor: pointer; }
+  button {
+    background: linear-gradient(90deg, #ff6b00, #ff914d);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: block;
+    margin: 20px auto;
+    transition: 0.3s;
+  }
+  button:hover { transform: scale(1.03); }
+
+  /* Result Page */
+  .result-container {
+    max-width: 700px;
+    margin: 50px auto;
+    background: #fff;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    display: none;
+  }
+  .header {
+    background: linear-gradient(90deg, #ff6b00, #ff914d);
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  .tabs {
+    display: flex;
+    justify-content: space-around;
+    border-bottom: 2px solid #eee;
+  }
+  .tab {
+    padding: 12px 20px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .tab.active {
+    color: #ff6b00;
+    border-bottom: 3px solid #ff6b00;
+  }
+  .content { padding: 30px; display: none; }
+  .content.active { display: block; }
+  .score-section {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 30px;
+    flex-wrap: wrap;
+  }
+  .circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 5px solid #ff6b00;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .circle-label { text-align: center; font-size: 14px; color: #666; }
+  .rank {
+    background: #fff5e6;
+    color: #ff6b00;
+    padding: 12px;
+    text-align: center;
+    border-radius: 8px;
+    margin-top: 25px;
+    font-weight: 500;
+  }
+  .wrong-item {
+    background: #fff3f3;
+    border-left: 5px solid #ff4d4d;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 6px;
+  }
+</style>
+</head>
+<body>
+<header>🔥 Fire Engineering MCQ Exam</header>
+<div id="floatingTimer">⏱️ 00:00:00</div>
+
+<div class="exam-container" id="exam">
+  <form id="examForm">
+    <div id="questions"></div>
+    <button type="submit">Submit Exam</button>
+  </form>
+</div>
+
+<div class="result-container" id="resultPage">
+  <div class="header">🔥 Fire Engineering Exam Result</div>
+  <div class="tabs">
+    <div class="tab active" onclick="openTab(event, 'result')">Test Result</div>
+    <div class="tab" onclick="openTab(event, 'wrong')">Wrong Questions ❓</div>
+    <div class="tab" onclick="openTab(event, 'rank')">Rank List</div>
+  </div>
+
+  <div id="result" class="content active">
+    <div class="score-section">
+      <div>
+        <div class="circle" id="scorePercent">0%</div>
+        <div class="circle-label">Score Ratio</div>
+      </div>
+      <div>
+        <div class="circle" id="scoreValue">0/100</div>
+        <div class="circle-label">Score</div>
+      </div>
+      <div>
+        <div class="circle" id="timeTaken">0s</div>
+        <div class="circle-label">Total Time</div>
+      </div>
+    </div>
+    <div class="rank" id="rankMsg"></div>
+  </div>
+
+  <div id="wrong" class="content"></div>
+
+  <div id="rank" class="content">
+    <p>1. You — <span id="rankScore"></span>%</p>
+    <p>2. Student B — 92%</p>
+    <p>3. Student C — 85%</p>
+  </div>
+</div>
+
+<script>
+const questionsData = [];
+// 100 Fire Engineering & Building Construction Questions (Updated from user's content)
+const questionSet = [
+  // UNIT I — BUILDING CONSTRUCTION – I (MCQs)
+  ["Which building material loses more than 50% of its strength when temperature exceeds 600°C?", ["Concrete", "Timber", "Structural steel", "Glass"], 2],
+  ["The charring rate of timber primarily depends on:", ["Moisture content", "Density", "Orientation", "Both A and B"], 3],
+  ["Which material explodes when subjected to rapid heating due to moisture expansion?", ["Granite", "Sandstone", "Limestone", "Marble"], 0],
+  ["Fire-rated glazing is fundamentally designed to resist:", ["Thermal shock only", "Radiant heat transfer", "Gas leakage", "Convection currents only"], 1],
+  ["The most fire-resistant type of brick is:", ["Refractory brick", "Sand-lime brick", "Fly ash brick", "Common burnt clay brick"], 0],
+  ["Cement loses its binding nature during fire exposure when temperature exceeds:", ["200°C", "570°C", "800°C", "1000°C"], 1],
+  ["Spalling in concrete during fire occurs due to:", ["Low permeability", "High permeability", "Water flow inside concrete", "Rusting of reinforcement"], 0],
+  ["Insulating materials fail mainly due to:", ["Thermal breakdown", "Load deformation", "Moisture absorption", "Oxidation"], 0],
+  ["Which steel type maintains higher fire resistance?", ["Cold-formed steel", "Mild steel", "Protected structural steel", "Stainless steel"], 2],
+  ["External cladding panels increase fire spread mainly due to:", ["Panel thickness", "Combustible core materials", "Outer aluminum layer", "Fixing bracket orientation"], 1],
+
+  // UNIT II — BUILDING CONSTRUCTION – II (MCQs)
+  ["Hollow steel columns behave differently in fire as compared to solid columns because of:", ["Lower mass", "Slower heat absorption", "Faster heat penetration", "Internal voids"], 3],
+  ["Which structural member usually fails last during fire?", ["Columns", "Beams", "Floors", "Roof members"], 0],
+  ["The most fire-resisting type of wall is:", ["Cavity wall", "Partition wall", "Solid masonry wall", "Stud wall"], 2],
+  ["Stairways in fire-safe buildings must have:", ["Central support", "Wider treads", "Enclosed shafts", "Ornamental railing"], 2],
+  ["Doors used in fire escape routes must have fire rating based on:", ["Thickness", "Occupancy", "Travel distance", "Fire load"], 3],
+  ["Fire-rated windows fail early due to:", ["Glass melting", "Frame warping", "Thermal shock", "Gasket failure"], 2],
+  ["Roof collapse in fire is most commonly due to:", ["Truss expansion", "Deck burning", "Beam buckling", "Loss of support"], 2],
+  ["Floors behave poorly in fire because of:", ["Heat conduction", "Structural continuity", "Load concentration", "Material brittleness"], 0],
+  ["The fire endurance of masonry walls depends upon:", ["Unit thickness only", "Mortar type only", "Bond type only", "All of the above"], 3],
+  ["Ventilation openings in buildings during fire primarily affect:", ["Smoke colour", "Fire pattern", "Flame temperature", "Structural integrity"], 1],
+
+  // UNIT III — FIRE PREVENTION SYSTEMS – I
+  ["BMS integration with fire systems improves:", ["Power distribution", "Ventilation speed", "Emergency coordination", "Building aesthetics"], 2],
+  ["HVAC integration in fire safety mainly prevents:", ["Air contamination", "Smoke migration", "Odour formation", "Gas mixing"], 1],
+  ["Pressurization systems are used for:", ["Increasing oxygen", "Smoke control in escape routes", "Lowering temperature", "Reducing air velocity"], 1],
+  ["Drenchers are primarily used for protecting:", ["External walls", "Interior ceilings", "Fire doors", "Escape ladders"], 0],
+  ["A fire curtain is used to:", ["Suppress the fire", "Limit smoke movement", "Cool structure", "Detect smoke"], 1],
+  ["Cause & effect matrix helps in:", ["Programming the detection panel", "Designing exit routes", "Calculating loads", "Hazard zoning"], 0],
+  ["Occupancy factor is related to:", ["Area of building", "No. of people present", "Fire load", "Building height"], 1],
+  ["Time of evacuation primarily depends on:", ["Fire load", "Travel distance", "Fire detection type", "Ventilation"], 1],
+  ["Protected route refers to:", ["Fire-rated corridor", "Open staircase", "Smoke-filled exit path", "Unprotected vertical riser"], 0],
+  ["Safety posters are part of:", ["PPE", "Safety communication", "Fire suppression", "Detection"], 1],
+
+  // UNIT IV — FIRE PREVENTION SYSTEMS – II
+  ["PEEP (Personal Emergency Evacuation Plan) is mainly for:", ["Fire wardens", "Visitors", "Physically challenged persons", "Fire fighters"], 2],
+  ["The first step in preparing an evacuation plan is:", ["Conduct mock drill", "Assess building design", "Assign roles", "Install signage"], 1],
+  ["Mock drill frequency is recommended based on:", ["Occupancy", "Building height", "Statutory requirement", "All of the above"], 3],
+  ["Entry/exit registers help in:", ["Attendance", "Tracking persons inside building", "Maintenance", "Security only"], 1],
+  ["Onsite emergency plan includes:", ["Disaster reporting", "Escape routes", "Assembly points", "All of the above"], 3],
+  ["Emergency response team roles exclude:", ["Alarm activation", "First aid", "Fire suppression", "Building design approval"], 3],
+  ["Orders/ Notices in fire prevention mainly ensure:", ["Compliance", "Aesthetics", "Decoration", "Workforce"], 0],
+  ["Emergency security personnel must know:", ["Exit routes", "Fire load", "Equipment purchase", "Control room wiring"], 0],
+  ["Off-site emergency plan mainly involves:", ["Internal escape", "External agencies coordination", "Internal fire wardens", "UPS backup"], 1],
+  ["Primary objective of evacuation is:", ["Reduce property loss", "Save lives", "Stop fire spread", "Ensure water supply"], 1],
+
+  // UNIT V — FIRE PROTECTION SYSTEMS – I
+  ["Water-based suppression is effective mainly due to:", ["Cooling effect", "Smothering", "Mechanical agitation", "Oxygen displacement"], 0],
+  ["Hydrant system design must follow:", ["Pipe diameter only", "Pressure & flow requirements", "Standpipe material", "Wall thickness"], 1],
+  ["Rising main “Wet system” means:", ["No water present", "Filled with water under pressure", "Filled with air", "Uses foam"], 1],
+  ["Downcomer is used in buildings of height more than:", ["15 m", "30 m", "45 m", "60 m"], 0],
+  ["Sprinkler activation is based on:", ["Smoke detection", "Flame contact", "Heat-sensitive element", "Oxygen depletion"], 2],
+  ["Deluge system is used for:", ["Offices", "Warehouses", "High hazard areas", "Hotel rooms"], 2],
+  ["Pre-action sprinkler system is required where:", ["High risk of false activation", "High temperature areas", "Large occupancy", "Small area"], 0],
+  ["Foam system is best used for:", ["Wood fires", "Electrical fire", "Flammable liquid fires", "Metal fires"], 2],
+  ["Water mist system works on:", ["High droplet size", "Low-pressure mist", "Fine droplet cooling", "Gas discharge"], 2],
+  ["Cartridge-based extinguishers differ from stored-pressure as they:", ["Have separate gas cartridge", "Store water only", "Cannot be refilled", "Are only CO₂ type"], 0],
+
+  // UNIT V (EXTINGUISHERS Continued)
+  ["MAP concentration is applicable for:", ["DCP extinguishers", "CO₂", "Water", "Foam"], 0],
+  ["FM-200 differs from Novec 1230 because:", ["Novec is liquid at room temperature", "FM-200 is corrosive", "Novec is ozone depleting", "FM-200 requires no storage"], 0],
+  ["CO₂ extinguishers mainly extinguish by:", ["Cooling", "Smothering", "Chain reaction breaking", "Water expansion"], 1],
+  ["Refill and pressure testing of extinguishers should be done every:", ["1 year", "2 years", "3 years", "5 years"], 3],
+  ["Clean agent extinguishers are suitable for:", ["Kitchens", "Server rooms", "Electrical panels", "All of the above"], 3],
+
+  // UNIT VI — FIRE PROTECTION SYSTEMS – II
+  ["Ionization detectors respond faster to:", ["Flaming fires", "Smoldering fires", "Chemical fires", "Electrical fires"], 0],
+  ["Beam detectors are designed for:", ["Small rooms", "Large open spaces", "Narrow corridors", "Wet areas"], 1],
+  ["MCP is used to:", ["Activate sprinklers", "Switch off HVAC", "Raise manual fire alarm", "Cut power supply"], 2],
+  ["Addressable alarm system advantage is:", ["Lower cost", "Zone identification", "Detector-wise pinpoint location", "Works without power"], 2],
+  ["Graphic User Interface (GUI) in fire panels helps in:", ["System programming", "Alarm visualization", "Mapping zones", "All of the above"], 3],
+  ["Gas leak detectors operate mainly on:", ["Chemical reaction", "IR absorption", "Laser scattering", "Thermal conduction"], 1],
+  ["System logic is applied in:", ["Detectors", "Fire control panel", "Sprinklers", "Exit lights"], 1],
+  ["Compartmentation in fire safety aims to:", ["Increase room size", "Limit fire spread", "Reduce ventilation", "Provide more exits"], 1],
+  ["Fire door must have:", ["Automatic closer", "Wooden frame", "Glass window", "No latch"], 0],
+  ["Fire seal is mainly applied around:", ["Floor openings", "Door gaps", "Window frames", "Ceiling joints"], 1],
+  ["Smoke seal prevents:", ["Heat transfer", "Smoke infiltration", "Water leakage", "Air conditioning loss"], 1],
+  ["Pressurization system maintains:", ["Negative pressure", "Positive pressure", "Zero pressure", "Vacuum"], 1],
+  ["Fire-resistant walls must have:", ["Low density", "High thermal conductivity", "Non-combustible core", "Glass finish"], 2],
+  ["Intumescent paint works by:", ["Chemical cooling", "Forming insulating char layer", "Absorbing heat", "Reflecting radiation"], 1],
+  ["Dampers are used in ducts to:", ["Control air flow", "Block smoke in fire", "Reduce noise", "Clean air"], 1],
+  ["Mineral fibre matting is used for:", ["Floor finishing", "Fire insulation", "Roof waterproofing", "Acoustic treatment"], 1],
+  ["Muster point is related to:", ["First aid", "Evacuation", "Fire suppression", "Fire detection"], 1],
+  ["Mortar coating increases fire resistance by:", ["Reducing steel exposure", "Adding weight", "Cooling", "Adhesion"], 0],
+  ["Fire floors must have:", ["Strong beams", "Fire compartmentation", "Glass facades", "Raised floors"], 1],
+  ["Emergency exit lights operate on:", ["AC only", "DC only", "Battery backup", "Generator supply only"], 2],
+
+  // MCQs 76–100 (Mixed Tough Questions from ALL Units)
+  ["Which material becomes brittle after fire exposure?", ["Cast iron", "Mild steel", "Glass", "Timber"], 0],
+  ["Which combination increases collapse risk?", ["High fire load + low ventilation", "Low fire load + high ventilation", "High temperature + sudden cooling", "Low occupancy + high humidity"], 2],
+  ["Fire-rated boards used for protection contain:", ["Gypsum", "Cement", "Aluminium", "Rubber"], 0],
+  ["Thermal shock in glass occurs due to:", ["Uniform heating", "Uneven heating", "Moisture", "Light exposure"], 1],
+  ["Structural failure in fire is MOST common in:", ["Beams", "Steel columns", "Concrete slabs", "Roof trusses"], 3],
+  ["Steel protected with fire coating fails at:", ["200–300°C", "400–500°C", "Above 800°C", "Only above 1000°C"], 2],
+  ["The rate of heat release depends on:", ["Fuel type", "Oxygen availability", "Ventilation", "All of the above"], 3],
+  ["Best extinguisher for Class F fire:", ["CO₂", "Dry chemical", "Wet chemical", "Foam"], 2],
+  ["Fire pump pressure test is done at:", ["50% rated pressure", "100%", "150% rated pressure", "Variable"], 2],
+  ["Clean agent systems protect:", ["Paper industry", "Chemicals", "Electronic equipment", "Cement plants"], 2],
+  ["Sounder output of alarm system is normally:", ["30 dB", "60 dB", "85 dB at 3 m", "100 dB at any distance"], 2],
+  ["Hooters are disabled-proof by:", ["High sound intensity", "Dual tone", "Audio-visual signaling", "Frequency modulation"], 2],
+  ["Foam proportioner mixes concentrate at:", ["1–2%", "3–6%", "10–15%", "25%"], 1],
+  ["Water hammer effect occurs in:", ["Hydrant systems", "Detection systems", "Gas systems", "Alarm circuits"], 0],
+  ["The safest smoke vent system uses:", ["Natural draft", "Mechanical ventilation", "Forced air", "Open windows"], 1],
+  ["False alarms may occur due to:", ["Dust", "Steam", "Insects", "All of the above"], 3],
+  ["Which system requires double interlock?", ["Wet sprinkler", "Dry sprinkler", "Pre-action", "Deluge"], 2],
+  ["Refractory materials resist up to:", ["500°C", "900°C", "1500°C", "2500°C"], 2],
+  ["Which has highest melting point?", ["Aluminium", "Copper", "Steel", "Cast iron"], 3],
+  ["Maximum travel distance in buildings is influenced by:", ["Occupancy", "Fire load", "Staircase width", "All of the above"], 3],
+  ["Fire doors must remain:", ["Locked", "Open", "Closed but not locked", "Always open"], 2],
+  ["Explosion risk increases when:", ["Upper flammable limit is high", "Lower flammable limit is wide", "Room is cold", "Occupancy is less"], 1],
+  ["Thermal layering refers to:", ["Floor heating", "Stratification of hot gases", "Water absorption", "Gas cooling"], 1],
+  ["Fireproofing thickness is decided by:", ["Fire rating", "Steel section", "Building type", "All of the above"], 3],
+  ["Final collapse usually occurs after:", ["Flashover", "Backdraft", "Smoldering", "Ignition"], 0]
+];
+
+// This loop processes the 100 questions from the array above
+for (let q of questionSet) {
+  questionsData.push({q:q[0], a:q[1], correct:q[2]});
+}
+
+// render
+const questionsDiv=document.getElementById("questions");
+questionsData.forEach((q,i)=>{
+  let html=`<div class='question'><h3>${i+1}. ${q.q}</h3>`;
+  q.a.forEach((opt,idx)=>{
+    html+=`<label><input type='radio' name='q${i}' value='${idx}'> ${opt}</label>`;
+  });
+  html+="</div>";
+  questionsDiv.innerHTML+=html;
+});
+
+// floating timer
+let seconds=0;
+const timerEl=document.getElementById("floatingTimer");
+const timerInterval = setInterval(()=>{
+  seconds++;
+  const h=String(Math.floor(seconds/3600)).padStart(2,'0');
+  const m=String(Math.floor((seconds%3600)/60)).padStart(2,'0');
+  const s=String(seconds%60).padStart(2,'0');
+  timerEl.textContent=`⏱️ ${h}:${m}:${s}`;
+},1000);
+
+// result calc
+document.getElementById("examForm").addEventListener("submit",(e)=>{
+  e.preventDefault();
+  clearInterval(timerInterval); // Stop the timer on submit
+  const total=questionsData.length;
+  let correct=0;
+  const wrongList=document.getElementById("wrong");
+  wrongList.innerHTML="";
+  questionsData.forEach((q,i)=>{
+    const ans=document.querySelector(`input[name='q${i}']:checked`);
+    if(ans && parseInt(ans.value)===q.correct) correct++;
+    else{
+      const yourAns=ans? q.a[parseInt(ans.value)] :"Not Answered";
+      wrongList.innerHTML+=`
+        <div class="wrong-item">
+          <strong>Q${i+1}:</strong> ${q.q}<br>
+          ❌ <b>Your Answer:</b> ${yourAns}<br>
+          ✅ <b>Correct:</b> ${q.a[q.correct]}
+        </div>`;
+    }
+  });
+  const percent=Math.round((correct/total)*100);
+  document.getElementById("scorePercent").innerText=percent+"%";
+  document.getElementById("scoreValue").innerText=`${correct}/${total}`;
+  document.getElementById("timeTaken").innerText=`${Math.floor(seconds/60)}m ${seconds%60}s`;
+  document.getElementById("rankScore").innerText=percent;
+  document.getElementById("rankMsg").innerText=percent===100?"You have scored full marks! Rank #1 🔥":`You scored ${percent}%. Keep improving!`;
+  document.getElementById("exam").style.display="none";
+  document.getElementById("floatingTimer").style.display="none"; // Hide timer on result page
+  document.getElementById("resultPage").style.display="block";
+});
+
+function openTab(evt,tabName){
+  document.querySelectorAll(".content").forEach(c=>c.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.getElementById(tabName).classList.add("active");
+  evt.currentTarget.classList.add("active");
+}
+</script>
+</body>
+</html>

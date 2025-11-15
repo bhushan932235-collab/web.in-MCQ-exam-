@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🔥 Fire Engineering MCQ Exam</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Poppins", sans-serif;
+    background: #fff6f0;
+    margin: 0;
+    padding: 0;
+  }
+  header {
+    text-align: center;
+    background: linear-gradient(90deg, #ff6b00, #ff914d);
+    color: white;
+    padding: 20px;
+    font-size: 26px;
+    font-weight: bold;
+    position: relative;
+  }
+  #floatingTimer {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: #ff6b00;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 18px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    z-index: 9999;
+  }
+  .exam-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  .question {
+    margin-bottom: 25px;
+    padding: 15px;
+    border: 1px solid #f0f0f0;
+    border-radius: 10px;
+  }
+  .question h3 { margin-bottom: 10px; color: #333; }
+  label { display: block; margin-bottom: 5px; cursor: pointer; }
+  button {
+    background: linear-gradient(90deg, #ff6b00, #ff914d);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: block;
+    margin: 20px auto;
+    transition: 0.3s;
+  }
+  button:hover { transform: scale(1.03); }
+
+  /* Result Page */
+  .result-container {
+    max-width: 700px;
+    margin: 50px auto;
+    background: #fff;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    display: none;
+  }
+  .header {
+    background: linear-gradient(90deg, #ff6b00, #ff914d);
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  .tabs {
+    display: flex;
+    justify-content: space-around;
+    border-bottom: 2px solid #eee;
+  }
+  .tab {
+    padding: 12px 20px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .tab.active {
+    color: #ff6b00;
+    border-bottom: 3px solid #ff6b00;
+  }
+  .content { padding: 30px; display: none; }
+  .content.active { display: block; }
+  .score-section {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 30px;
+    flex-wrap: wrap;
+  }
+  .circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 5px solid #ff6b00;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .circle-label { text-align: center; font-size: 14px; color: #666; }
+  .rank {
+    background: #fff5e6;
+    color: #ff6b00;
+    padding: 12px;
+    text-align: center;
+    border-radius: 8px;
+    margin-top: 25px;
+    font-weight: 500;
+  }
+  .wrong-item {
+    background: #fff3f3;
+    border-left: 5px solid #ff4d4d;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 6px;
+  }
+</style>
+</head>
+<body>
+<header>🔥 Fire Engineering MCQ Exam</header>
+<div id="floatingTimer">⏱️ 00:00:00</div>
+
+<div class="exam-container" id="exam">
+  <form id="examForm">
+    <div id="questions"></div>
+    <button type="submit">Submit Exam</button>
+  </form>
+</div>
+
+<div class="result-container" id="resultPage">
+  <div class="header">🔥 Fire Engineering Exam Result</div>
+  <div class="tabs">
+    <div class="tab active" onclick="openTab(event, 'result')">Test Result</div>
+    <div class="tab" onclick="openTab(event, 'wrong')">Wrong Questions ❓</div>
+    <div class="tab" onclick="openTab(event, 'rank')">Rank List</div>
+  </div>
+
+  <div id="result" class="content active">
+    <div class="score-section">
+      <div>
+        <div class="circle" id="scorePercent">0%</div>
+        <div class="circle-label">Score Ratio</div>
+      </div>
+      <div>
+        <div class="circle" id="scoreValue">0/100</div>
+        <div class="circle-label">Score</div>
+      </div>
+      <div>
+        <div class="circle" id="timeTaken">0s</div>
+        <div class="circle-label">Total Time</div>
+      </div>
+    </div>
+    <div class="rank" id="rankMsg"></div>
+  </div>
+
+  <div id="wrong" class="content"></div>
+
+  <div id="rank" class="content">
+    <p>1. You — <span id="rankScore"></span>%</p>
+    <p>2. Student B — 92%</p>
+    <p>3. Student C — 85%</p>
+  </div>
+</div>
+
+<script>
+const questionsData = [];
+// 100 Fire Science & Thermal Engineering Questions (Updated from user's content)
+const questionSet = [
+  // UNIT I – BASICS OF FIRE SCIENCE – I
+  ["Which phenomenon most accurately explains why atoms bond to form molecules?", ["Electrostatic attraction", "Nuclear binding forces", "Fusion of nuclei", "Loss of kinetic energy"], 0],
+  ["Which component of the fire triangle directly influences the reaction rate the most?", ["Fuel", "Heat", "Oxygen", "Chain reaction"], 1],
+  ["Which extinguisher is most effective for disrupting the chain reaction specifically?", ["Water spray", "CO₂", "Dry chemical powder", "Foam"], 2],
+  ["Water extinguishes fire primarily by:", ["Dilution", "Cooling below ignition temperature", "Smothering", "Dispersing fuel"], 1],
+  ["Which property of water makes it an excellent extinguishing medium?", ["Low latent heat", "High specific heat", "High vapor density", "High thermal conductivity"], 1],
+  ["In the Indian Standards, classification of Class B fire is based on:", ["Flammable liquids", "Energised electrical equipment", "Combustible metals", "Ordinary combustibles"], 0],
+  ["A fire that involves magnesium falls under which category?", ["Class A", "Class B", "Class C", "Class D"], 3],
+  ["When a flame is extinguished due to reduced oxygen concentration, the mechanism is:", ["Inhibition", "Smothering", "Starvation", "Cooling"], 1],
+  ["In a confined space fire, which factor becomes the most dominant risk?", ["Radiative heat", "Oxygen depletion", "Fuel vaporisation", "Thermal conductivity"], 1],
+  ["A fire involving LPG leakage belongs to:", ["Class A", "Class B", "Class C", "Class D"], 2],
+  
+  // UNIT II – BASICS OF FIRE SCIENCE – II
+  ["The fire tetrahedron adds which additional element beyond the fire triangle?", ["Oxygen supply", "Inhibitors", "Chain reaction", "Heat transfer"], 2],
+  ["Inhibition chain reactions primarily work by:", ["Lowering temperature", "Absorbing heat", "Disrupting free radicals", "Diluting oxygen"], 2],
+  ["Hydrogen combustion is an example of:", ["Endothermic chain reaction", "Radical-driven chain reaction", "Ionic reaction", "Catalytic surface reaction"], 1],
+  ["Free radicals in flame propagation are generally:", ["Highly unstable molecules", "Atoms with unpaired electrons", "Fully stable compounds", "Non-reactive ions"], 1],
+  ["Exothermic reactions release energy mostly in the form of:", ["Radiant heat", "Potential energy", "Chemical energy", "Thermal & light energy"], 3],
+  ["A reaction that continues only when heat is continuously supplied is:", ["Exothermic", "Endothermic", "Self-propagating", "Catalytic"], 1],
+  ["Which is an example of endothermic reaction relevant to fire science?", ["Combustion", "Pyrolysis", "Oxidation", "Vaporisation of liquid fuel"], 3],
+  ["Preventive measures for fire spread mainly target:", ["Fuel reduction", "Oxygen enrichment", "Increasing ventilation", "Enhancing heat transfer"], 0],
+  ["The induction period in chain reaction refers to:", ["Time until flame becomes visible", "Delay due to free radical build-up", "Cooling stage", "Diffusion of oxygen"], 1],
+  ["Which radical is most common in hydrocarbon combustion?", ["OH", "NH", "NO₂", "CH₄"], 0],
+  
+  // UNIT III – COMBUSTION
+  ["Combustion is fundamentally a:", ["Physical reaction", "Chemical oxidation process", "Endothermic reaction", "Catalytic process"], 1],
+  ["Which type of combustion produces no flame?", ["Rapid", "Spontaneous", "Slow", "Explosive"], 2],
+  ["The lower limit of flammability depends mostly on:", ["Fuel density", "Vapor pressure", "Minimum concentration for flame propagation", "Temperature of combustion"], 2],
+  ["Auto-ignition temperature is the temperature at which:", ["Flame is visible", "Ignition occurs without external spark", "Oxygen concentration decreases", "Fuel evaporates completely"], 1],
+  ["Flash point is defined as:", ["Temp at which fuel burns continuously", "Lowest temp where vapour ignites momentarily", "Temp at which flame is sustained", "Temp where vapours cease to form"], 1],
+  ["Fire point is always:", ["Equal to flash point", "Higher than flash point", "Lower than flash point", "Dependent on oxygen"], 1],
+  ["Specific gravity of liquid fuel determines:", ["Flash point", "Whether fuel floats or sinks in water", "Vapour density", "Ignition temperature"], 1],
+  ["Vapour density > 1 means:", ["Vapour is lighter than air", "Vapour rises upward", "Vapour is heavier than air", "Vapour floats"], 2],
+  ["Latent heat of vaporisation is relevant in:", ["Flame cooling", "Water extinguishment", "Removing oxygen", "Increasing chain reactions"], 1],
+  ["Catalyst in combustion generally:", ["Slows combustion", "Lowers activation energy", "Reduces temperature", "Removes radicals"], 1],
+  ["Which solid has the highest surface area to mass ratio?", ["Block", "Sheet", "Powder", "Cylinder"], 2],
+  ["Higher humidity in atmosphere generally:", ["Increases ignition", "Supports combustion", "Decreases combustion rate", "Does nothing"], 2],
+  ["Combustion of metal dust is generally:", ["Non-explosive", "Rare", "Highly explosive", "Slow"], 2],
+  ["Oxidation is defined as:", ["Loss of electrons", "Gain of electrons", "Loss of heat", "Endothermic process"], 0],
+  ["Flame temperature depends mainly on:", ["Humidity", "Fuel-air ratio", "Vapour density", "Pressure"], 1],
+  ["Hydrogen-air explosion range is:", ["Extremely narrow", "Moderately narrow", "Extremely wide", "Dependent on humidity"], 2],
+  ["The stoichiometric mixture refers to:", ["Maximum oxygen", "Minimum oxygen", "Exact ratio for complete combustion", "Ratio for highest heat loss"], 2],
+  ["Combustion increases when atmospheric pressure:", ["Decreases", "Increases", "Is constant", "Negatively fluctuates"], 1],
+  ["Ignition of combustible dust generally depends on:", ["Density", "Particle size", "Colour", "Ambient colour"], 1],
+  ["A smouldering fire is primarily:", ["Non-oxidative", "Solid-phase oxidation", "Liquid-phase combustion", "Gas-phase reaction"], 1],
+  
+  // UNIT IV – FIRE RESISTANCE & FIRE LOAD CONCEPT
+  ["Fire resistance is best defined as:", ["Ability to prevent flame", "Ability to withstand fire without collapse", "Heat absorption capacity", "Firefighting ability"], 1],
+  ["Flame spread test determines:", ["Rate of ignition", "Rate at which flame travels", "Heat release rate", "Smoke density"], 1],
+  ["Fire load is defined as:", ["Total combustibles per unit volume", "Total heat from complete burning of combustibles", "Flame temperature", "Latent heat only"], 1],
+  ["Calorific value relates to:", ["Heat absorbed by water", "Heat released per unit mass of fuel", "Temperature at ignition", "Flash point"], 1],
+  ["Occupancy classification influences:", ["Ventilation", "Fire load", "Thermal expansion", "Vapour density"], 1],
+  ["Which material typically exhibits highest fire resistance?", ["Wood", "Steel", "Brick masonry", "Aluminium"], 2],
+  ["Steel loses its strength drastically at:", ["100°C", "200°C", "600°C", "900°C"], 2],
+  ["In fire testing, “Reaction to fire” refers to:", ["Spread of fire", "Structural stability", "Smoke and heat release", "Ignition resistance"], 2],
+  ["A higher fire load density means:", ["Lower fire severity", "Higher possible fire severity", "Constant severity", "No relation"], 1],
+  ["Fire resistance rating is measured in:", ["Minutes", "Hours", "Seconds", "Both A & B"], 3],
+  
+  // UNIT V – TRANSMISSION OF HEAT
+  ["Heat transfer by molecular interaction is:", ["Convection", "Conduction", "Radiation", "Conduction & radiation"], 1],
+  ["Heat transfer through electromagnetic waves is:", ["Conduction", "Radiation", "Convection", "Conduction-convection mix"], 1],
+  ["Convection occurs primarily in:", ["Solids", "Vacuum", "Fluids", "Metals"], 2],
+  ["BTU measures:", ["Heat per kg", "Heat per pound", "Heat to raise 1 lb water by 1°F", "Heat to vaporise water"], 2],
+  ["Specific heat expresses:", ["Heat needed to raise 1 kg by 1°C", "Latent heat", "Vaporisation energy", "Mass-energy relationship"], 0],
+  ["Radiation increases sharply with:", ["Linear rise in temperature", "Quadratic rise", "Fourth-power rise", "No relation"], 2],
+  ["Volatile liquids generally have:", ["High boiling points", "Low vapour pressure", "High vapour pressure", "High density"], 2],
+  ["Spontaneous heating occurs due to:", ["Rapid evaporation", "Internal oxidation", "no ventilation", "High humidity"], 1],
+  ["Heat transmission risk is highest in:", ["Wooden partitions", "Steel beams", "Glass", "Concrete"], 0],
+  ["Heat energy always flows from:", ["Cold to hot", "Hot to cold", "Low pressure to high", "High density to low"], 1],
+  ["Conduction in metals is mainly due to movement of:", ["Ions", "Electrons", "Neutrons", "Atoms"], 1],
+  ["Radiation heat transfer is highest in:", ["Transparent surfaces", "Shiny surfaces", "Black bodies", "Polished aluminium"], 2],
+  ["Heat convection rate increases with:", ["No air movement", "Forced air movement", "Vacuum", "Lower density"], 1],
+  ["Thermal conductivity is lowest in:", ["Metal", "Wood", "Glass", "Insulating foam"], 3],
+  
+  // UNIT VI – GAS LAWS & THERMAL EXPANSION
+  ["Boyle’s Law states that at constant temperature:", ["P ∝ T", "V ∝ T", "PV = constant", "VT = constant"], 2],
+  ["Charles’ Law states:", ["V ∝ T", "P ∝ V", "PT = constant", "PV ∝ T"], 0],
+  ["General gas law combines:", ["Boyle + Dalton", "Charles + Dalton", "Boyle + Charles", "Avogadro + Newton"], 2],
+  ["Temperature must be taken in which scale for gas laws?", ["Fahrenheit", "Celsius", "Kelvin", "Rankine"], 2],
+  ["Invar (nickel-iron alloy) is used because of its:", ["High conductivity", "Very low thermal expansion", "High melting point", "High density"], 1],
+  ["Thermal expansion in solids occurs because:", ["Electrons migrate", "Temperature decreases", "Atomic vibrations increase", "Pressure increases"], 2],
+  ["Cubical expansion is highest in:", ["Solids", "Liquids", "Gases", "Metals only"], 2],
+  ["Sublimation is the process where:", ["Liquid → Gas", "Solid → Gas", "Gas → Liquid", "Solid → Liquid"], 1],
+  ["Thermostats operate based on:", ["Radiation", "Conduction", "Expansion of metals", "Combustion"], 2],
+  ["Critical temperature is the temperature above which:", ["Gas liquefies", "Gas cannot be liquefied", "Solid melts", "Combustion stops"], 1],
+  ["Pressure of a gas increases when:", ["Temperature decreases", "Volume increases", "Temperature increases", "Gas leaks"], 2],
+  
+  // Remaining 25 MCQs (76–100)
+  ["A gas with high compressibility typically follows:", ["Boyle’s Law perfectly", "Charles' Law perfectly", "Deviations from ideal gas laws", "No gas laws"], 2],
+  ["Expansion of liquids is commonly measured by:", ["Linear coefficient", "Volumetric coefficient", "Cubical hardness", "Density index"], 1],
+  ["A material with high coefficient of linear expansion is likely to:", ["Crack under heat", "Shrink", "Stay dimensionally stable", "Harden"], 0],
+  ["Gases expand mainly due to:", ["Gravity", "Increase in molecular motion", "Chemical change", "Mass increase"], 1],
+  ["Liquids differ from solids in expansion because:", ["Molecular bonding is weaker", "Temperature decreases", "Pressure is constant", "Density increases"], 0],
+  ["A rapid pressure drop in gas causes:", ["Cooling", "Heating", "No change", "Combustion"], 0],
+  ["Pressure of gas is measured using:", ["Thermometer", "Barometer", "Manometer", "Hygrometer"], 2],
+  ["Fire in a pressurised vessel is dangerous because:", ["Fuel decreases", "Vessel can BLEVE", "Pressure reduces", "Fire extinguishes"], 1],
+  ["BLEVE is caused by:", ["Loss of oxygen", "Overheating of vessel containing liquid", "Cooling the tank", "Vapour removing"], 1],
+  ["Gas density decreases when:", ["Temperature increases", "Temperature decreases", "Pressure increases", "Volume decreases"], 0],
+  ["Specific heat of water is:", ["Low", "Very low", "High", "Zero"], 2],
+  ["Liquid whose vapour pressure is high at room temperature is:", ["Non-volatile", "Volatile", "Stable", "Thick"], 1],
+  ["Heat conduction in air is:", ["High", "Moderate", "Nearly zero", "Higher than metals"], 2],
+  ["When gas is compressed rapidly:", ["Temperature rises", "Temperature falls", "Density decreases", "Vapour density increases"], 0],
+  ["If gas is heated at constant volume:", ["Pressure decreases", "Pressure increases", "No pressure change", "Gas condenses"], 1],
+  ["Expansion coefficient of gases is approximately:", ["Constant", "Zero", "Negative", "Highly variable"], 0],
+  ["Liquids expand more than solids because:", ["Stronger bonds", "Weaker intermolecular attraction", "No molecules", "Higher melting point"], 1],
+  ["Sublimation occurs in:", ["Dry ice", "Water", "Iron", "Oil"], 0],
+  ["The lowest temperature at which solids expand significantly is:", ["-10°C", "Very near absolute zero", "Room temperature", "100°C"], 1],
+  ["The thermal expansion of gases is:", ["Nonlinear", "Linear with temperature", "Irregular", "Negative"], 1],
+  ["Invar is used in measuring instruments because:", ["High heat capacity", "Low expansion", "High expansion", "Chemical resistance"], 1],
+  ["Sublimation requires:", ["Heat absorption", "Heat release", "No heat", "Pressure removal only"], 0],
+  ["Vapour pressure of liquids depends strongly on:", ["Humidity", "Temperature", "Density", "Colour"], 1],
+  ["Gas compressibility factor (Z) equals 1 when:", ["Gas is ideal", "Gas is liquid", "Gas is solid", "Gas reacts"], 0],
+  ["Expansion of metals in thermostats is generally:", ["Nonlinear", "Linear", "Independent of temperature", "Negative"], 1]
+];
+
+// This loop processes the 100 questions from the array above
+for (let q of questionSet) {
+  questionsData.push({q:q[0], a:q[1], correct:q[2]});
+}
+
+// render
+const questionsDiv=document.getElementById("questions");
+questionsData.forEach((q,i)=>{
+  let html=`<div class='question'><h3>${i+1}. ${q.q}</h3>`;
+  q.a.forEach((opt,idx)=>{
+    html+=`<label><input type='radio' name='q${i}' value='${idx}'> ${opt}</label>`;
+  });
+  html+="</div>";
+  questionsDiv.innerHTML+=html;
+});
+
+// floating timer
+let seconds=0;
+const timerEl=document.getElementById("floatingTimer");
+const timerInterval = setInterval(()=>{
+  seconds++;
+  const h=String(Math.floor(seconds/3600)).padStart(2,'0');
+  const m=String(Math.floor((seconds%3600)/60)).padStart(2,'0');
+  const s=String(seconds%60).padStart(2,'0');
+  timerEl.textContent=`⏱️ ${h}:${m}:${s}`;
+},1000);
+
+// result calc
+document.getElementById("examForm").addEventListener("submit",(e)=>{
+  e.preventDefault();
+  clearInterval(timerInterval); // Stop the timer on submit
+  const total=questionsData.length;
+  let correct=0;
+  const wrongList=document.getElementById("wrong");
+  wrongList.innerHTML="";
+  questionsData.forEach((q,i)=>{
+    const ans=document.querySelector(`input[name='q${i}']:checked`);
+    if(ans && parseInt(ans.value)===q.correct) correct++;
+    else{
+      const yourAns=ans? q.a[parseInt(ans.value)] :"Not Answered";
+      wrongList.innerHTML+=`
+        <div class="wrong-item">
+          <strong>Q${i+1}:</strong> ${q.q}<br>
+          ❌ <b>Your Answer:</b> ${yourAns}<br>
+          ✅ <b>Correct:</b> ${q.a[q.correct]}
+        </div>`;
+    }
+  });
+  const percent=Math.round((correct/total)*100);
+  document.getElementById("scorePercent").innerText=percent+"%";
+  document.getElementById("scoreValue").innerText=`${correct}/${total}`;
+  document.getElementById("timeTaken").innerText=`${Math.floor(seconds/60)}m ${seconds%60}s`;
+  document.getElementById("rankScore").innerText=percent;
+  document.getElementById("rankMsg").innerText=percent===100?"You have scored full marks! Rank #1🔥":`You scored ${percent}%. Keep improving!`;
+  document.getElementById("exam").style.display="none";
+  document.getElementById("floatingTimer").style.display="none"; // Hide timer on result page
+  document.getElementById("resultPage").style.display="block";
+});
+
+function openTab(evt,tabName){
+  document.querySelectorAll(".content").forEach(c=>c.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.getElementById(tabName).classList.add("active");
+  evt.currentTarget.classList.add("active");
+}
+</script>
+</body>
+</html>
