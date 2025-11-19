@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🔥 Basics of Fire Science Exam</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Poppins", sans-serif;
+    background: #fff6f0;
+    margin: 0;
+    padding: 0;
+  }
+  header {
+    text-align: center;
+    background: linear-gradient(90deg, #d32f2f, #ff5252); /* Red gradient for Fire Science */
+    color: white;
+    padding: 20px;
+    font-size: 26px;
+    font-weight: bold;
+    position: relative;
+  }
+  #floatingTimer {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: #d32f2f;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 18px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    z-index: 9999;
+  }
+  .exam-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  .question {
+    margin-bottom: 25px;
+    padding: 15px;
+    border: 1px solid #f0f0f0;
+    border-radius: 10px;
+  }
+  .question h3 { margin-bottom: 10px; color: #333; }
+  label { display: block; margin-bottom: 5px; cursor: pointer; }
+  button {
+    background: linear-gradient(90deg, #d32f2f, #ff5252);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: block;
+    margin: 20px auto;
+    transition: 0.3s;
+  }
+  button:hover { transform: scale(1.03); }
+
+  /* Result Page */
+  .result-container {
+    max-width: 700px;
+    margin: 50px auto;
+    background: #fff;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    display: none;
+  }
+  .header {
+    background: linear-gradient(90deg, #d32f2f, #ff5252);
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  .tabs {
+    display: flex;
+    justify-content: space-around;
+    border-bottom: 2px solid #eee;
+  }
+  .tab {
+    padding: 12px 20px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .tab.active {
+    color: #d32f2f;
+    border-bottom: 3px solid #d32f2f;
+  }
+  .content { padding: 30px; display: none; }
+  .content.active { display: block; }
+  .score-section {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 30px;
+    flex-wrap: wrap;
+  }
+  .circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 5px solid #d32f2f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .circle-label { text-align: center; font-size: 14px; color: #666; }
+  .rank {
+    background: #fff5e6;
+    color: #d32f2f;
+    padding: 12px;
+    text-align: center;
+    border-radius: 8px;
+    margin-top: 25px;
+    font-weight: 500;
+  }
+  .wrong-item {
+    background: #fff3f3;
+    border-left: 5px solid #ff4d4d;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 6px;
+  }
+</style>
+</head>
+<body>
+<header>🔥 Basics of Fire Science Exam</header>
+<div id="floatingTimer">⏱️ 00:00:00</div>
+
+<div class="exam-container" id="exam">
+  <form id="examForm">
+    <div id="questions"></div>
+    <button type="submit">Submit Exam</button>
+  </form>
+</div>
+
+<div class="result-container" id="resultPage">
+  <div class="header">🔥 Exam Result</div>
+  <div class="tabs">
+    <div class="tab active" onclick="openTab(event, 'result')">Test Result</div>
+    <div class="tab" onclick="openTab(event, 'wrong')">Wrong Questions ❓</div>
+    <div class="tab" onclick="openTab(event, 'rank')">Rank List</div>
+  </div>
+
+  <div id="result" class="content active">
+    <div class="score-section">
+      <div>
+        <div class="circle" id="scorePercent">0%</div>
+        <div class="circle-label">Score Ratio</div>
+      </div>
+      <div>
+        <div class="circle" id="scoreValue">0/100</div>
+        <div class="circle-label">Score</div>
+      </div>
+      <div>
+        <div class="circle" id="timeTaken">0s</div>
+        <div class="circle-label">Total Time</div>
+      </div>
+    </div>
+    <div class="rank" id="rankMsg"></div>
+  </div>
+
+  <div id="wrong" class="content"></div>
+
+  <div id="rank" class="content">
+    <p>1. You — <span id="rankScore"></span>%</p>
+    <p>2. Student B — 92%</p>
+    <p>3. Student C — 85%</p>
+  </div>
+</div>
+
+<script>
+const questionsData = [];
+
+// 100 Basics of Fire Science Questions (Mapped to your key)
+const questionSet = [
+  // UNIT I
+  ["Which component of fire triangle is removed when CO₂ extinguishers are applied?", ["Heat", "Fuel", "Oxygen", "Chain reaction"], 2],
+  ["Which of the following is a physical method of extinguishment?", ["Cooling", "Inhibition", "Smothering", "Fuel removal"], 0],
+  ["Fire classification in India is governed by:", ["BIS 2217", "IS 2190", "IS 15683", "IS 1646"], 3],
+  ["Water extinguishes fire mainly by:", ["Starvation", "Chain inhibition", "Cooling", "Smothering"], 2],
+  ["Which extinguishing agent has the highest heat absorption capacity?", ["Foam", "Dry powder", "CO₂", "Water"], 3],
+  ["Molecules bonded by sharing electrons represent:", ["Ionic bonds", "Covalent bonds", "Van der Waals forces", "Metallic bonds"], 1],
+  ["Class B fires involve:", ["Flammable liquids", "Combustible metals", "Energized electrical equipment", "Gases only"], 0],
+  ["Which type of fire extinguisher is most effective on electrical fires?", ["Water", "Foam", "CO₂", "Wet chemical"], 2],
+  ["Which stage of fire is characterized by full room involvement?", ["Incipient", "Growth", "Fully developed", "Decay"], 2],
+  ["Flashover occurs typically during:", ["Incipient stage", "Growth stage", "Decay stage", "Post-flashover stage"], 1],
+
+  // UNIT II
+  ["Which is NOT a preventive measure for common fire causes?", ["Overloading circuits", "Earthing", "Thermal insulation", "Regular maintenance"], 0],
+  ["Fire tetrahedron’s additional component (beyond triangle) is:", ["Air movement", "Chain reaction", "Temperature", "Fuel vaporization"], 1],
+  ["Which extinguishing mechanism disrupts chain reactions?", ["CO₂", "Halons", "Water", "Foam"], 1],
+  ["Hydrogen combustion follows which reaction type?", ["Ionic displacement", "Free radical mechanism", "Neutralization", "Polymerization"], 1],
+  ["Exothermic reactions:", ["Always absorb heat", "Are reversible only", "Release heat", "Cannot cause combustion"], 2],
+  ["Endothermic processes involve:", ["Heat release", "Molecular breakdown only", "Heat absorption", "No temperature change"], 2],
+  ["A free radical in combustion is:", ["Stable molecule", "Highly reactive species", "A cooled product", "A combustion inhibitor"], 1],
+  ["Un-inhibition chain reaction is stopped by:", ["CO₂", "N₂", "Bromine compounds", "Water spray"], 2],
+  ["Preventive measure for electrical fires:", ["Using flammable insulation", "Overloading", "Loose wiring", "Circuit breakers"], 3],
+  ["Fire spread due to chemical self-heating is known as:", ["Radiation", "Pyrophoric ignition", "External flaming", "Catalytic ignition"], 1],
+
+  // UNIT III
+  ["Combustion is chemically defined as:", ["Rapid oxidation with heat & light", "Slow decomposition", "Exothermic polymerization", "Reaction without heat"], 0],
+  ["Auto-ignition temperature is:", ["Lowest temperature of vaporization", "Temperature at spontaneous ignition", "Temperature for flashover", "Boiling temperature"], 1],
+  ["Flash point is:", ["Temperature where vapor sustains combustion", "Temp. at which fuel evaporates", "Lowest temp. giving ignitable vapor", "Explosion temperature"], 2],
+  ["Specific gravity <1 indicates liquid will:", ["Sink in water", "Float on water", "Not mix with water", "Explode"], 1],
+  ["Vapor density >1 means vapor will:", ["Rise", "Mix uniformly", "Sink & accumulate", "Stay at ceiling"], 2],
+  ["Which type of combustion has NO flame?", ["Diffusion", "Smoldering", "Premixed", "Rapid"], 1],
+  ["Explosive range refers to:", ["Temperature of explosion", "Pressure at blast", "Mixture concentration limits", "Combustion color"], 2],
+  ["Catalysts in combustion:", ["Stop reactions", "Slow down reactions", "Increase reaction rate", "Remove oxygen"], 2],
+  ["Latent heat of fusion refers to:", ["Heat required to evaporate", "Heat removed during solidification", "Heat to melt solid without temp rise", "Heat produced by combustion"], 2],
+  ["High surface-area fuels burn:", ["Slowly", "Not at all", "More rapidly", "Only at high temperature"], 2],
+  ["The ignition temperature of hydrogen is:", ["Very high", "Very low", "Moderate", "Same as methane"], 1],
+  ["Rate of combustion increases with increase in:", ["Humidity", "Oxygen concentration", "Moisture content", "Inhibitors"], 1],
+  ["Limits of flammability are given for:", ["Liquids only", "Solids only", "Vapor-air mixtures", "Water solutions"], 2],
+  ["Vapor pressure increase results in:", ["Reduced evaporation", "Higher vapor release", "Lower combustion risk", "Zero ignition tendency"], 1],
+  ["Auto-ignition occurs:", ["With open flame", "Without external ignition", "Only with catalysts", "Only under pressure"], 1],
+  ["Smoldering combustion occurs mostly in:", ["Metals", "Liquids", "Solid porous materials", "Gases"], 2],
+  ["Fire point is:", ["Lower than flash point", "Higher than flash point", "Same as boiling point", "Same as melting point"], 1],
+  ["Hydrogen flame is difficult to detect because:", ["Low luminosity", "High density", "Orange flame", "High soot content"], 0],
+  ["Which has the widest explosive range?", ["Propane", "Methane", "Hydrogen", "Diesel"], 2],
+  ["Rate of burning increases with:", ["High humidity", "High atmospheric pressure", "Lower temperature", "Higher moisture"], 1],
+
+  // UNIT IV
+  ["Fire resistance test measures:", ["Ignition time", "Structural endurance", "Flash point", "Smoke toxicity"], 1],
+  ["Fire load is based on:", ["Electrical wiring", "Fuel quantity & calorific value", "Ventilation", "Humidity"], 1],
+  ["Which test studies flame spread?", ["Cone calorimeter", "Flammability test", "Char expansion test", "Gas density test"], 1],
+  ["Occupancy grading is based on:", ["Temperature", "Fire load", "Construction type", "Fire color"], 1],
+  ["Fire resistance rating is expressed in:", ["Minutes or hours", "Newtons", "Joules", "Lumens"], 0],
+  ["Calorific value is:", ["Heat released by complete combustion", "Heat required to ignite", "Heat required to melt", "Heat absorbed by walls"], 0],
+  ["Higher fire load means:", ["Lower risk", "Higher heat output", "Lower fuel quantity", "Greater fire resistance"], 1],
+  ["Reaction-to-fire test evaluates:", ["Stability", "Ignition & spread behavior", "Thermal conductivity", "Vapor pressure"], 1],
+  ["Fire load density is:", ["Fire load per unit area", "Fire load per unit mass", "Temp. per minute", "Heat per second"], 0],
+  ["Structural failure in fire occurs when:", ["Moisture increases", "Temperature exceeds strength limit", "Pressure falls", "Combustion ceases"], 1],
+
+  // UNIT V
+  ["BTU is a unit of:", ["Force", "Heat", "Pressure", "Energy only for liquids"], 1],
+  ["Heat transfer between surfaces without contact is:", ["Conduction", "Convection", "Radiation", "Conversion"], 2],
+  ["Conduction occurs strongest in:", ["Gases", "Liquids", "Solids", "Vacuum"], 2],
+  ["Convection currents depend on:", ["Density differences", "Mass only", "Shape only", "Color"], 0],
+  ["Radiation needs:", ["Medium", "Solid path", "No medium", "Conductor"], 2],
+  ["Specific heat is:", ["Heat to raise 1 kg by 1°C", "Heat released on combustion", "Heat absorbed at melting", "Heat per unit volume"], 0],
+  ["Volatile liquids:", ["Evaporate easily", "Never evaporate", "Are non-flammable", "Freeze rapidly"], 0],
+  ["Spontaneous heating occurs due to:", ["External flames", "Chemical self-heating", "Water cooling", "High pressure"], 1],
+  ["Conduction is most influenced by:", ["Thickness", "Color", "Flash point", "Humidity"], 0],
+  ["Radiation increases with:", ["Lower temperature", "Higher temperature", "High moisture", "Cold surfaces"], 1],
+  ["Heat is measured in:", ["Joules", "Newtons", "Lux", "Amperes"], 0],
+  ["Convection occurs only in:", ["Solids", "Liquids & gases", "Metals", "Vaccum"], 1],
+  ["Latent heat is absorbed during:", ["Temperature drop", "Phase change", "Combustion", "Chemical inhibition"], 1],
+  ["A poor conductor of heat is:", ["Copper", "Aluminum", "Concrete", "Air"], 3],
+  ["Thermal conductivity is highest in:", ["Steel", "Wood", "Plastic", "Air"], 0],
+  ["Heat transfer in flame spread in buildings occurs mostly by:", ["Radiation", "Filtration", "Adsorption", "Absorption"], 0],
+  ["Temperature conversion from °C to K uses:", ["+100", "+373", "+273", "−273"], 2],
+  ["Spontaneous combustion occurs mainly in:", ["Plastics", "Coal piles & oily rags", "Glass", "Metals"], 1],
+  ["Rate of heat transfer depends on:", ["Color", "Temperature difference", "Chemical formula", "Vapor density"], 1],
+  ["Convection heat transfer increases with:", ["Low airflow", "High airflow", "No movement", "Zero gravity"], 1],
+
+  // UNIT VI
+  ["Boyle’s law states that P × V = constant at:", ["Constant temperature", "Constant pressure", "Constant volume", "Constant energy"], 0],
+  ["Charles’ law relates:", ["Pressure & volume", "Volume & temperature", "Temperature & energy", "Pressure & temperature"], 1],
+  ["General gas law combines:", ["Boyle + Dalton", "Boyle + Charles", "Newton + Charles", "Avogadro + Pascal"], 1],
+  ["Thermal expansion in solids depends on:", ["Density", "Coefficient of expansion", "Pressure", "Color"], 1],
+  ["Invar alloy (Nickel-iron) is used because it has:", ["High expansion", "Zero expansion", "High melting point", "Low density"], 1],
+  ["Sublimation refers to:", ["Solid → liquid", "Liquid → gas", "Solid → gas", "Gas → liquid"], 2],
+  ["Pressure increases when:", ["Volume increases", "Temperature decreases", "Mole number increases", "Gas is removed"], 2],
+  ["Gas at constant volume follows:", ["Boyle", "Charles", "Pressure law", "Joule law"], 2],
+  ["Critical temperature is when:", ["Gas liquefies by temp alone", "Gas explodes", "Vapor pressure = 0", "Solid melts"], 0],
+  ["Cubical expansion applies to:", ["Solids only", "Solids & liquids", "Gases only", "Metals only"], 1],
+  ["Gas pressure is measured in:", ["Lux", "Newtons", "Pascal", "Henry"], 2],
+  ["Sublimation occurs in:", ["Ice", "Oil", "Steel", "Wood"], 0],
+  ["Thermal expansion in liquids is measured by:", ["Linear", "Volumetric", "Cubic", "Elastic"], 1],
+  ["Gas cools when:", ["Compressed", "Expanded", "Heated", "Mixed"], 1],
+  ["Thermostats use metals with:", ["Same expansion", "Different expansion", "No expansion", "Explosive expansion"], 1],
+  ["Volume of gas reduces when:", ["Pressure reduces", "Temperature increases", "Temperature decreases", "Mole number increases"], 2],
+  ["Gas behaves ideally at:", ["High pressure", "Very low temperature", "Low pressure & high temp", "High density"], 2],
+  ["Law of pressures states:", ["V ∝ P", "P ∝ T", "P × V = constant", "P + P₁ + P₂ = constant"], 1],
+  ["Expansion in metals increases with:", ["Thermal conductivity", "Temperature rise", "Color", "Pressure decrease"], 1],
+  ["The unit of coefficient of expansion is:", ["1/°C", "°C", "Pascal", "Kelvin"], 0],
+
+  // Mixed
+  ["Fire load directly affects:", ["Flash point", "Structural design", "Extinguisher color", "Fuel thickness"], 1],
+  ["Endothermic reactions will:", ["Increase combustion", "Absorb heat from surroundings", "Produce flames", "Always cause fire spread"], 1],
+  ["Radiation heat transfer is dominant in:", ["Smoldering", "Flaming fires", "Endothermic reactions", "Flash point tests"], 1],
+  ["Auto-ignition occurs at:", ["Flash point temperature", "Fire point temperature", "Temperature without spark", "Explosion point"], 2],
+  ["Which gas law supports balloon expansion when heated?", ["Boyle", "Charles", "Dalton", "Avogadro"], 1],
+  ["Fire spread in vertical shafts is due to:", ["Radiation only", "Stack effect (convection)", "Low humidity", "Fuel density"], 1],
+  ["Maximum heat transfer in fires is via:", ["Conduction", "Convection", "Radiation", "Sublimation"], 2],
+  ["Fire growth in the incipient stage is:", ["Slow", "Rapid", "Uncontrolled", "Impossible"], 0],
+  ["Halon extinguishes by:", ["Cooling", "Smothering", "Chain reaction inhibition", "Fuel removal"], 2],
+  ["Lower explosive limit (LEL) means:", ["Minimum O₂ for life", "Lowest concentration for ignition", "Max concentration allowed", "Pressure limit for tanks"], 1]
+];
+
+// This loop processes the 100 questions from the array above
+for (let q of questionSet) {
+  questionsData.push({q:q[0], a:q[1], correct:q[2]});
+}
+
+// render
+const questionsDiv=document.getElementById("questions");
+questionsData.forEach((q,i)=>{
+  let html=`<div class='question'><h3>${i+1}. ${q.q}</h3>`;
+  q.a.forEach((opt,idx)=>{
+    html+=`<label><input type='radio' name='q${i}' value='${idx}'> ${opt}</label>`;
+  });
+  html+="</div>";
+  questionsDiv.innerHTML+=html;
+});
+
+// floating timer
+let seconds=0;
+const timerEl=document.getElementById("floatingTimer");
+const timerInterval = setInterval(()=>{
+  seconds++;
+  const h=String(Math.floor(seconds/3600)).padStart(2,'0');
+  const m=String(Math.floor((seconds%3600)/60)).padStart(2,'0');
+  const s=String(seconds%60).padStart(2,'0');
+  timerEl.textContent=`⏱️ ${h}:${m}:${s}`;
+},1000);
+
+// result calc
+document.getElementById("examForm").addEventListener("submit",(e)=>{
+  e.preventDefault();
+  clearInterval(timerInterval); // Stop the timer on submit
+  const total=questionsData.length;
+  let correct=0;
+  const wrongList=document.getElementById("wrong");
+  wrongList.innerHTML="";
+  questionsData.forEach((q,i)=>{
+    const ans=document.querySelector(`input[name='q${i}']:checked`);
+    if(ans && parseInt(ans.value)===q.correct) correct++;
+    else{
+      const yourAns=ans? q.a[parseInt(ans.value)] :"Not Answered";
+      wrongList.innerHTML+=`
+        <div class="wrong-item">
+          <strong>Q${i+1}:</strong> ${q.q}<br>
+          ❌ <b>Your Answer:</b> ${yourAns}<br>
+          ✅ <b>Correct:</b> ${q.a[q.correct]}
+        </div>`;
+    }
+  });
+  const percent=Math.round((correct/total)*100);
+  document.getElementById("scorePercent").innerText=percent+"%";
+  document.getElementById("scoreValue").innerText=`${correct}/${total}`;
+  document.getElementById("timeTaken").innerText=`${Math.floor(seconds/60)}m ${seconds%60}s`;
+  document.getElementById("rankScore").innerText=percent;
+  document.getElementById("rankMsg").innerText=percent===100?"You have scored full marks! Rank #1 🔥":`You scored ${percent}%. Keep improving!`;
+  document.getElementById("exam").style.display="none";
+  document.getElementById("floatingTimer").style.display="none"; // Hide timer on result page
+  document.getElementById("resultPage").style.display="block";
+});
+
+function openTab(evt,tabName){
+  document.querySelectorAll(".content").forEach(c=>c.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.getElementById(tabName).classList.add("active");
+  evt.currentTarget.classList.add("active");
+}
+</script>
+</body>
+</html>
