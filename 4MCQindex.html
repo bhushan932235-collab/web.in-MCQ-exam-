@@ -1,14 +1,409 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title></title>
-</head>
-
-<body>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🏗️ Building Construction & Fire Protection Exam</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+    padding: 0;
+  }
+  header {
+    text-align: center;
+    background: linear-gradient(135deg, #b71c1c, #d32f2f);
+    color: white;
+    padding: 25px;
+    font-size: 28px;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  #floatingTimer {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #263238;
+    color: #fff;
+    padding: 12px 25px;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 18px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    z-index: 1000;
+    border: 2px solid #fff;
+  }
+  .exam-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+  }
+  .question {
+    margin-bottom: 30px;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fafafa;
+    transition: transform 0.2s;
+  }
+  .question:hover {
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .question h3 { margin-top:0; margin-bottom: 15px; color: #2c3e50; font-size: 1.1em; }
+  label { display: block; margin-bottom: 8px; cursor: pointer; padding: 5px; border-radius: 4px; }
+  label:hover { background: #eee; }
+  input[type="radio"] { margin-right: 10px; }
   
-</body>
+  button {
+    background: #d32f2f;
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    display: block;
+    margin: 30px auto 0;
+    transition: 0.3s;
+    box-shadow: 0 4px 15px rgba(211, 47, 47, 0.4);
+  }
+  button:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(211, 47, 47, 0.6); }
 
+  /* Result Page */
+  .result-container {
+    max-width: 800px;
+    margin: 50px auto;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border-radius: 12px;
+    overflow: hidden;
+    display: none;
+  }
+  .header-res {
+    background: #263238;
+    color: #fff;
+    text-align: center;
+    padding: 25px;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  .tabs {
+    display: flex;
+    justify-content: center;
+    background: #eceff1;
+    border-bottom: 1px solid #cfd8dc;
+  }
+  .tab {
+    padding: 15px 30px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #546e7a;
+    transition: 0.3s;
+  }
+  .tab:hover { background: #cfd8dc; }
+  .tab.active {
+    color: #d32f2f;
+    border-bottom: 4px solid #d32f2f;
+    background: #fff;
+  }
+  .content { padding: 40px; display: none; }
+  .content.active { display: block; animation: fadeIn 0.5s; }
+  
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+  .score-section {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .circle-wrap { text-align: center; }
+  .circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 8px solid #d32f2f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: #333;
+    font-weight: 700;
+    margin-bottom: 10px;
+    background: #fff;
+  }
+  .rank-msg {
+    background: #e0f2f1;
+    color: #00695c;
+    padding: 15px;
+    text-align: center;
+    border-radius: 8px;
+    margin-top: 30px;
+    font-weight: 600;
+    font-size: 1.1em;
+  }
+  .wrong-item {
+    background: #ffebee;
+    border-left: 6px solid #d32f2f;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 4px;
+  }
+  .wrong-item strong { color: #b71c1c; display: block; margin-bottom: 5px; }
+  .user-ans { color: #d32f2f; text-decoration: line-through; }
+  .correct-ans { color: #2e7d32; font-weight: bold; }
+</style>
+</head>
+<body>
+<header>🏗️ Building Construction & Fire Protection Exam</header>
+<div id="floatingTimer">⏱️ 00:00:00</div>
+
+<div class="exam-container" id="exam">
+  <form id="examForm">
+    <div id="questions"></div>
+    <button type="submit">Submit Exam</button>
+  </form>
+</div>
+
+<div class="result-container" id="resultPage">
+  <div class="header-res">📊 Exam Results Analysis</div>
+  <div class="tabs">
+    <div class="tab active" onclick="openTab(event, 'result')">Score Card</div>
+    <div class="tab" onclick="openTab(event, 'wrong')">Review Mistakes</div>
+    <div class="tab" onclick="openTab(event, 'rank')">Leaderboard</div>
+  </div>
+
+  <div id="result" class="content active">
+    <div class="score-section">
+      <div class="circle-wrap">
+        <div class="circle" id="scorePercent">0%</div>
+        <div>Percentage</div>
+      </div>
+      <div class="circle-wrap">
+        <div class="circle" id="scoreValue">0/100</div>
+        <div>Marks Scored</div>
+      </div>
+      <div class="circle-wrap">
+        <div class="circle" id="timeTaken" style="border-color: #455a64;">0s</div>
+        <div>Time Taken</div>
+      </div>
+    </div>
+    <div class="rank-msg" id="rankMsg"></div>
+  </div>
+
+  <div id="wrong" class="content"></div>
+
+  <div id="rank" class="content">
+    <h3>🏆 Current Rankings</h3>
+    <p>1. <b>You</b> — <span id="rankScore"></span>%</p>
+    <p>2. Candidate A — 94%</p>
+    <p>3. Candidate B — 88%</p>
+    <p>4. Candidate C — 76%</p>
+  </div>
+</div>
+
+<script>
+const questionSet = [
+  // UNIT I - Materials & Behaviour
+  ["What happens to the thermal conductivity of steel as temperature increases?", ["Decreases", "Remains constant", "Increases", "Fluctuates"], 0],
+  ["Which phenomenon causes concrete surfaces to peel off explosively in fire?", ["Creeping", "Spalling", "Buckling", "Necking"], 1],
+  ["Timber burns at a predictable rate known as:", ["Flash rate", "Charring rate", "Melting rate", "Oxidation rate"], 1],
+  ["Which type of glass has the highest resistance to thermal shock?", ["Annealed glass", "Laminated glass", "Borosilicate (Wired) glass", "Plate glass"], 2],
+  ["The behaviour of aluminium in fire is characterized by:", ["High melting point", "Rapid loss of strength & low melting point", "Zero expansion", "Toxic fume emission"], 1],
+  ["Which stone is most liable to crack and disintegrate under fire?", ["Granite", "Sandstone", "Limestone", "Marble"], 0],
+  ["Plastics that melt and drip when heated are called:", ["Thermosetting", "Thermoplastics", "Elastomers", "Composites"], 1],
+  ["Gypsum board provides fire resistance mainly due to:", ["Carbon content", "Bound crystalline water", "High density", "Reflective surface"], 1],
+  ["At what temperature does steel lose approximately 50% of its yield strength?", ["300°C", "550°C", "800°C", "1000°C"], 1],
+  ["Intumescent coatings protect steel by:", ["Cooling it with water", "Expanding to form an insulating char", "Reflecting heat", "Absorbing oxygen"], 1],
+
+  // UNIT II - Structural Elements
+  ["A wall that prevents fire spread between two buildings is called a:", ["Partition wall", "Load bearing wall", "Party wall / Firewall", "Curtain wall"], 2],
+  ["The primary failure mode of steel trusses in fire is:", ["Shearing", "Buckling due to expansion", "Crushing", "Corrosion"], 1],
+  ["Fire resistance rating (FRR) is determined by:", ["Integrity, Insulation, Stability", "Cost, Weight, Color", "Height, Width, Depth", "Material brand"], 0],
+  ["Which floor system generally offers the best fire resistance?", ["Timber joist", "Unprotected steel deck", "Reinforced concrete slab", "Pre-stressed concrete"], 2],
+  ["A 'fire stop' is used to:", ["Stop fire trucks", "Seal penetrations in fire barriers", "Extinguish fire", "Detect smoke"], 1],
+  ["The 'slenderness ratio' mainly affects the fire resistance of:", ["Beams", "Columns", "Slabs", "Windows"], 1],
+  ["Compartmentation helps in:", ["Ventilation", "Limiting fire spread to a manageable area", "Reducing construction cost", "Increasing aesthetics"], 1],
+  ["In a fire, pre-stressed concrete may fail faster than RCC due to:", ["Loss of pre-stress in tendons", "Heavier weight", "More water content", "Thicker cover"], 0],
+  ["A parapet wall on a roof helps to:", ["Prevent roof collapse", "Prevent upward flame spread to adjacent buildings", "Support the slab", "Drain water"], 1],
+  ["Fire doors are rated by their ability to withstand fire for:", ["10 minutes", "Specific periods (e.g., 60, 120 mins)", "Unlimited time", "24 hours"], 1],
+
+  // UNIT III - Fire Prevention & HVAC
+  ["The primary function of a Staircase Pressurization System is to:", ["Cool the stairs", "Keep smoke out of the staircase", "Pump oxygen in", "Remove dust"], 1],
+  ["In the event of a fire, HVAC Fire Dampers are designed to:", ["Open fully", "Close to stop smoke spread", "Spin faster", "Disconnect power"], 1],
+  ["A 'Dead End' in a corridor is dangerous because:", ["It has no ventilation", "Occupants have no alternative escape route", "It is dark", "It collects dust"], 1],
+  ["The maximum travel distance to an exit is determined by:", ["Building occupancy and hazard class", "Building height", "Number of elevators", "Wall color"], 0],
+  ["A 'Refuge Area' in a high-rise building is:", ["A storage room", "A safe place for temporary shelter during evacuation", "The security cabin", "The basement"], 1],
+  ["Smoke Reservoirs are created using:", ["Smoke curtains", "Steel beams", "Water sprays", "Glass walls"], 0],
+  ["Natural smoke ventilation relies on:", ["Fans", "Buoyancy of hot smoke", "Air conditioning", "Pumps"], 1],
+  ["The 'Stack Effect' in tall buildings causes smoke to:", ["Stay on the ground", "Move vertically through shafts", "Dissipate instantly", "Freeze"], 1],
+  ["Integration of BMS (Building Management System) with Fire Alarm ensures:", ["Auto-dialing police", "Automatic shutdown of AHUs and Lifts", "Locking all doors", "Turning off lights"], 1],
+  ["Emergency lighting is critical for:", ["Illuminating escape routes", "Security cameras", "Reading instructions", "Highlighting fire extinguishers"], 0],
+
+  // UNIT IV - Emergency Planning
+  ["The acronym 'R.A.C.E' in fire emergency stands for:", ["Run, Alert, Call, Exit", "Rescue, Alarm, Confine, Extinguish/Evacuate", "Read, Act, Call, End", "Run, Ask, Call, Escape"], 1],
+  ["A 'Muster Point' or 'Assembly Area' should be located:", ["On the roof", "In the basement", "In a safe open space away from the building", "In the lobby"], 2],
+  ["How often should fire drills be conducted in high-hazard industries?", ["Once in 5 years", "As per statutory requirements (e.g., Quarterly/ Biannually)", "Never", "Weekly"], 1],
+  ["The role of a 'Fire Warden' is to:", ["Fight the fire alone", "Assist in orderly evacuation", "Repair the alarm", "Call the media"], 1],
+  ["'PEEP' in evacuation planning stands for:", ["Personal Emergency Evacuation Plan", "Public Emergency Exit Protocol", "Primary Exit Emergency Plan", "People Exit Entry Point"], 0],
+  ["Signage for 'Fire Exit' should essentially be:", ["Blue and White", "Green and White (with photoluminescent properties)", "Red and Black", "Yellow and Black"], 1],
+  ["In an emergency, elevators (lifts) should:", ["Be used for quick escape", "Not be used (unless designated for evacuation)", "Go to the top floor", "Stop between floors"], 1],
+  ["A Fire Safety Audit primarily assesses:", ["Financial loss", "Compliance with safety standards and gaps", "Employee attendance", "Insurance premiums"], 1],
+  ["The 'PASS' method is used for:", ["Opening doors", "Operating fire extinguishers", "Calling fire brigade", "Using hose reels"], 1],
+  ["Effective evacuation plans must consider:", ["Only able-bodied people", "People with disabilities and visitors", "Only staff", "Only security guards"], 1],
+
+  // UNIT V - Water Based Protection
+  ["The color of the bulb in a sprinkler rated for 68°C is:", ["Red", "Green", "Blue", "Orange"], 0],
+  ["A 'Wet Riser' system is always:", ["Dry", "Charged with water under pressure", "Filled with foam", "Connected to gas"], 1],
+  ["The main purpose of a 'Jockey Pump' is to:", ["Fight major fires", "Maintain line pressure and compensate for minor leaks", "Pump water to the tank", "Cool the engine"], 1],
+  ["Which valve prevents backflow of water from the fire system to the domestic supply?", ["Gate valve", "Non-return valve (Check valve)", "Globe valve", "Butterfly valve"], 1],
+  ["A 'Deluge System' uses:", ["Closed sprinklers", "Open sprinklers/nozzles", "Foam only", "Gas only"], 1],
+  ["The Standard Thread used for fire hydrants enables:", ["Compatibility with hose couplings", "Water saving", "Pressure reduction", "Leak prevention"], 0],
+  ["In a Sprinkler system, the 'Gong Bell' acts as a:", ["Mechanical water motor alarm", "Electric timer", "Pressure gauge", "Flow switch"], 0],
+  ["Fire pumps in a high-rise building usually start:", ["Manually", "Automatically on pressure drop", "By remote", "By voice command"], 1],
+  ["A 'Siamese Connection' (Fire Dept Connection) allows:", ["Fire brigade to pump water INTO the building system", "Occupants to take water OUT", "Testing of water", "Mixing of foam"], 0],
+  ["The minimum duration of water supply required for fire tanks is typically:", ["10 minutes", "1 to 4 hours (depending on hazard class)", "24 hours", "1 week"], 1],
+
+  // UNIT VI - Detection & Passive Protection
+  ["Which detector is fastest at detecting visible smoke from slow-burning fires?", ["Ionization", "Photoelectric (Optical)", "Heat", "Flame"], 1],
+  ["A 'Beam Detector' is best suited for:", ["Small rooms", "Large open spaces like atriums/warehouses", "Kitchens", "Bathrooms"], 1],
+  ["An 'Addressable' fire alarm panel can:", ["Identify the exact location of the triggered device", "Only show the zone", "Extinguish fire automatically", "Send SMS only"], 0],
+  ["'Aspirating Smoke Detectors' (VESDA) work by:", ["Waiting for smoke to rise", "Actively drawing air samples through pipes", "Using lasers only", "Measuring heat"], 1],
+  ["Manual Call Points (MCP) should be mounted at a height of:", ["0.5 meters", "1.4 meters (+/- 0.2m)", "2.5 meters", "Ground level"], 1],
+  ["Cable trays passing through walls must be sealed with:", ["Cement", "Fire-rated pillows or mortar", "Plastic", "Wood"], 1],
+  ["Passive Fire Protection (PFP) includes:", ["Sprinklers", "Fire extinguishers", "Fire resistant structural coating and compartmentation", "Alarms"], 2],
+  ["Which detector is prone to false alarms near kitchens?", ["Heat detector", "Smoke detector", "Flame detector", "Beam detector"], 1],
+  ["Fire Curtains are flexible barriers that:", ["Deploy automatically to block fire/smoke", "Are used for decoration", "Are made of plastic", "Block water"], 0],
+  ["Emergency Voice Evacuation systems are preferred over bells because:", ["They are louder", "They provide specific instructions reducing panic", "They are cheaper", "They look better"], 1],
+
+  // MIXED & TOUGH (61-100)
+  ["The 'Neutral Plane' in a fire scenario refers to:", ["The floor level", "The level where pressure inside equals pressure outside", "The ceiling", "The basement"], 1],
+  ["Flashover transforms a fire from:", ["Growth stage to Fully Developed stage", "Decay to Growth", "Incipient to Decay", "Cooling to Heating"], 0],
+  ["Which class of fire involves cooking oils and fats?", ["Class A", "Class B", "Class D", "Class K (or F)"], 3],
+  ["What is the purpose of a 'Landing Valve'?", ["To land the helicopter", "To connect fire hoses on staircase landings", "To drain water", "To release pressure"], 1],
+  ["Sprinkler heads marked with 'upright' deflectors must be installed:", ["Pointing down", "Pointing up", "Sideways", "Anywhere"], 1],
+  ["Halon was banned primarily because:", ["It was ineffective", "It depleted the Ozone layer", "It was too expensive", "It was flammable"], 1],
+  ["Novec 1230 and FM-200 are examples of:", ["Dry powders", "Clean Agent gaseous suppression systems", "Foam concentrates", "Water additives"], 1],
+  ["A 'Dry Pipe' sprinkler system is used in:", ["Offices", "Areas subject to freezing temperatures", "Kitchens", "Basements"], 1],
+  ["The term 'Means of Egress' includes:", ["Exit access, Exit, and Exit discharge", "Elevators and Windows", "Roof and Basement", "Lobby only"], 0],
+  ["Fire dampers are usually triggered by:", ["Smoke detectors or Fusible links", "Manual switches", "Water flow", "Motion sensors"], 0],
+  ["Hypoxia refers to lack of:", ["Fuel", "Heat", "Oxygen", "Carbon Dioxide"], 2],
+  ["A 'Breeching Inlet' is used to:", ["Pump water into the Dry Riser", "Drain the tank", "Vent smoke", "Test pressure"], 0],
+  ["Which material is non-combustible?", ["Wood", "PVC", "Concrete", "Bitumen"], 2],
+  ["Carbon Monoxide (CO) is dangerous because:", ["It smells bad", "It is invisible, odorless, and binds to hemoglobin", "It is blue", "It causes burns"], 1],
+  ["The 'Fire Load' is calculated based on:", ["Number of people", "Calorific value and quantity of combustible materials", "Building height", "Water capacity"], 1],
+  ["NFPA 13 deals with the standard for:", ["Fire Alarms", "Sprinkler Systems", "Extinguishers", "Fire Doors"], 1],
+  ["Linear Heat Detectors (LHD) are essentially:", ["Cables that detect heat along their length", "Spot detectors", "Cameras", "Thermometers"], 0],
+  ["Water Mist systems use water droplets of size:", ["Less than 1000 microns (typically <200)", "Over 5 mm", "Like rain", "Solid ice"], 0],
+  ["In a fire causing structural collapse, 'Pancaking' refers to:", ["Walls falling out", "Floors falling on top of one another", "Roof flying off", "Beam twisting"], 1],
+  ["Structural steel is often encased in concrete to:", ["Make it look good", "Protect it from corrosion only", "Provide thermal insulation (Fireproofing)", "Add weight"], 2],
+  ["A 'Class D' fire extinguisher is designed for:", ["Wood", "Liquids", "Combustible Metals", "Electronics"], 2],
+  ["Exit signs must be illuminated to at least:", ["1 Lux", "5 Lux (or 54 lux depending on code)", "100 Lux", "0 Lux"], 1],
+  ["Positive Pressure Ventilation (PPV) involves:", ["Sucking smoke out", "Forcing fresh air in to push smoke out", "Cooling the air", "Closing all doors"], 1],
+  ["The 'L.E.L.' of a gas stands for:", ["Low Energy Level", "Lower Explosive Limit", "Least Effective Level", "Lower Emission Limit"], 1],
+  ["Which is NOT a passive fire protection measure?", ["Fire door", "Sprinkler system", "Fire wall", "Fire stopping"], 1],
+  ["Smoke density is measured in:", ["Optical Density / meter", "Kilograms", "Litres", "Degrees"], 0],
+  ["Intrinsically Safe (IS) equipment is required in:", ["Offices", "Explosive atmospheres/Hazardous zones", "Schools", "Hospitals"], 1],
+  ["A 'Zone Chart' near the fire panel helps to:", ["Decorate the wall", "Quickly locate the fire area", "List employee names", "Show water levels"], 1],
+  ["Standard hose reel diameter is usually:", ["100 mm", "19 mm or 25 mm", "63 mm", "10 mm"], 1],
+  ["Fire tetrahydron implies that combustion needs:", ["3 elements", "4 elements (Fuel, Heat, Oxygen, Chain Reaction)", "2 elements", "1 element"], 1],
+  ["Drencher systems are mainly used for:", ["Internal cooling", "Exposure protection (External walls/Windows)", "Putting out Class A fires", "Electrical fires"], 1],
+  ["Foam extinguishes fire by:", ["Smothering (separating fuel from oxygen)", "Heating", "Blowing air", "Removing fuel"], 0],
+  ["The discharge time of a standard CO2 extinguisher is approx:", ["1 hour", "10-30 seconds", "5 minutes", "2 minutes"], 1],
+  ["Scissor stairs provide:", ["Two separate egress paths in one shaft", "Escalator service", "Spiral access", "Ladder access"], 0],
+  ["Combustible cladding (like ACP with PE core) promotes:", ["Fire containment", "Rapid vertical fire spread", "Structural stability", "Smoke reduction"], 1],
+  ["A 'Fusible Link' melts to:", ["Activate a device (sprinkler/damper)", "Stop water", "Sound an alarm", "Lock a door"], 0],
+  ["Cavity barriers are installed in:", ["Empty spaces within walls/ceilings to stop smoke spread","Water tanks", "Floors", "Basements"], 0],
+  ["Emergency Power Supply (DG/UPS) must pick up load within:", ["1 minute", "10-15 seconds", "1 hour", "Manual start only"], 1],
+  ["A 'Monitor' in firefighting is:", ["A computer screen", "A high-capacity water/foam cannon", "A security guard", "A smoke detector"], 1],
+  ["The primary goal of Life Safety Code (NFPA 101 / NBC) is:", ["Property protection", "Life safety and egress", "Insurance calculation", "Building aesthetics"], 1]
+];
+
+const questionsData = [];
+// Process questions
+for (let q of questionSet) {
+  questionsData.push({q:q[0], a:q[1], correct:q[2]});
+}
+
+// Render Questions
+const questionsDiv = document.getElementById("questions");
+questionsData.forEach((q,i)=>{
+  let html = `<div class='question'><h3>Q${i+1}. ${q.q}</h3>`;
+  q.a.forEach((opt,idx)=>{
+    html += `<label><input type='radio' name='q${i}' value='${idx}'> ${opt}</label>`;
+  });
+  html += "</div>";
+  questionsDiv.innerHTML += html;
+});
+
+// Timer Logic
+let seconds = 0;
+const timerEl = document.getElementById("floatingTimer");
+const timerInterval = setInterval(()=>{
+  seconds++;
+  const h = String(Math.floor(seconds/3600)).padStart(2,'0');
+  const m = String(Math.floor((seconds%3600)/60)).padStart(2,'0');
+  const s = String(seconds%60).padStart(2,'0');
+  timerEl.textContent = `⏱️ ${h}:${m}:${s}`;
+},1000);
+
+// Submission Logic
+document.getElementById("examForm").addEventListener("submit", (e)=>{
+  e.preventDefault();
+  clearInterval(timerInterval);
+  const total = questionsData.length;
+  let correct = 0;
+  const wrongList = document.getElementById("wrong");
+  wrongList.innerHTML = "<h3>❌ Incorrect Answers Review</h3>";
+  
+  questionsData.forEach((q,i)=>{
+    const ans = document.querySelector(`input[name='q${i}']:checked`);
+    if(ans && parseInt(ans.value) === q.correct) {
+      correct++;
+    } else {
+      const yourAns = ans ? q.a[parseInt(ans.value)] : "Not Answered";
+      wrongList.innerHTML += `
+        <div class="wrong-item">
+          <strong>Question ${i+1}: ${q.q}</strong>
+          <span class="user-ans">Your Answer: ${yourAns}</span><br>
+          <span class="correct-ans">✅ Correct Answer: ${q.a[q.correct]}</span>
+        </div>`;
+    }
+  });
+
+  const percent = Math.round((correct/total)*100);
+  document.getElementById("scorePercent").innerText = percent + "%";
+  document.getElementById("scoreValue").innerText = `${correct}/${total}`;
+  document.getElementById("timeTaken").innerText = `${Math.floor(seconds/60)}m ${seconds%60}s`;
+  document.getElementById("rankScore").innerText = percent;
+  
+  let msg = "";
+  if(percent >= 90) msg = "Outstanding! You are a Fire Safety Expert! 🌟";
+  else if(percent >= 75) msg = "Great job! You have strong concepts. 🔥";
+  else if(percent >= 50) msg = "Good effort, but review the weak areas. 📚";
+  else msg = "Keep studying! Fire safety requires precision. ⚠️";
+  
+  document.getElementById("rankMsg").innerText = msg;
+  document.getElementById("exam").style.display = "none";
+  document.getElementById("floatingTimer").style.display = "none";
+  document.getElementById("resultPage").style.display = "block";
+  window.scrollTo(0,0);
+});
+
+function openTab(evt, tabName) {
+  document.querySelectorAll(".content").forEach(c => c.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById(tabName).classList.add("active");
+  evt.currentTarget.classList.add("active");
+}
+</script>
+</body>
 </html>
