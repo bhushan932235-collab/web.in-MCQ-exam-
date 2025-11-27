@@ -1,14 +1,424 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title></title>
-</head>
-
-<body>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🔥 Basics of Fire Science Exam</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #fff0eb; /* Light warm background */
+    margin: 0;
+    padding: 0;
+  }
+  header {
+    text-align: center;
+    background: linear-gradient(135deg, #ff512f, #dd2476); /* Fire gradient */
+    color: white;
+    padding: 30px;
+    font-size: 28px;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(221, 36, 118, 0.3);
+  }
+  #floatingTimer {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #fff;
+    color: #dd2476;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    z-index: 1000;
+    border: 2px solid #dd2476;
+  }
+  .exam-container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  }
+  .question {
+    margin-bottom: 25px;
+    padding: 20px;
+    border: 1px solid #ffe0d6;
+    border-radius: 12px;
+    background-color: #fff9f7;
+    transition: transform 0.2s;
+  }
+  .question:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  }
+  .question h3 { margin-top:0; margin-bottom: 15px; color: #c0392b; font-size: 1.15em; }
   
-</body>
+  label { 
+    display: block; 
+    margin-bottom: 10px; 
+    cursor: pointer; 
+    padding: 8px 12px; 
+    border-radius: 6px; 
+    transition: background 0.2s;
+  }
+  label:hover { background: #ffe0d6; }
+  input[type="radio"] { margin-right: 12px; accent-color: #dd2476; }
+  
+  button {
+    background: linear-gradient(135deg, #ff512f, #dd2476);
+    color: white;
+    border: none;
+    padding: 15px 50px;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    display: block;
+    margin: 40px auto 0;
+    transition: 0.3s;
+    box-shadow: 0 4px 15px rgba(221, 36, 118, 0.4);
+  }
+  button:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(221, 36, 118, 0.6); }
 
+  /* Result Page */
+  .result-container {
+    max-width: 800px;
+    margin: 50px auto;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border-radius: 16px;
+    overflow: hidden;
+    display: none;
+  }
+  .header-res {
+    background: #333;
+    color: #fff;
+    text-align: center;
+    padding: 25px;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  .tabs {
+    display: flex;
+    justify-content: center;
+    background: #f4f4f4;
+    border-bottom: 1px solid #ddd;
+  }
+  .tab {
+    padding: 15px 30px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #555;
+    transition: 0.3s;
+  }
+  .tab:hover { background: #ddd; }
+  .tab.active {
+    color: #dd2476;
+    border-bottom: 4px solid #dd2476;
+    background: #fff;
+  }
+  .content { padding: 40px; display: none; }
+  .content.active { display: block; animation: fadeIn 0.5s; }
+  
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+  .score-section {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    text-align: center;
+  }
+  .circle {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 8px solid #dd2476;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #333;
+    font-weight: 800;
+    margin: 0 auto 10px auto;
+    background: #fff;
+  }
+  .label { font-size: 14px; color: #666; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+  
+  .rank-msg {
+    background: #fff0eb;
+    color: #c0392b;
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px;
+    margin-top: 35px;
+    font-weight: 600;
+    font-size: 1.2em;
+    border: 1px solid #ffcccb;
+  }
+  .wrong-item {
+    background: #fff5f5;
+    border-left: 5px solid #ff4d4d;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 6px;
+  }
+  .wrong-item strong { display: block; margin-bottom: 8px; color: #333; }
+  .user-ans { color: #d32f2f; text-decoration: line-through; margin-right: 10px; }
+  .correct-ans { color: #27ae60; font-weight: bold; }
+</style>
+</head>
+<body>
+<header>🔥 Basics of Fire Science Exam</header>
+<div id="floatingTimer">⏱️ 00:00:00</div>
+
+<div class="exam-container" id="exam">
+  <form id="examForm">
+    <div id="questions"></div>
+    <button type="submit">Submit Exam</button>
+  </form>
+</div>
+
+<div class="result-container" id="resultPage">
+  <div class="header-res">📊 Exam Performance</div>
+  <div class="tabs">
+    <div class="tab active" onclick="openTab(event, 'result')">Score Card</div>
+    <div class="tab" onclick="openTab(event, 'wrong')">Mistakes Review</div>
+    <div class="tab" onclick="openTab(event, 'rank')">Leaderboard</div>
+  </div>
+
+  <div id="result" class="content active">
+    <div class="score-section">
+      <div>
+        <div class="circle" id="scorePercent">0%</div>
+        <div class="label">Accuracy</div>
+      </div>
+      <div>
+        <div class="circle" id="scoreValue">0/100</div>
+        <div class="label">Score</div>
+      </div>
+      <div>
+        <div class="circle" id="timeTaken" style="border-color: #333;">0s</div>
+        <div class="label">Time</div>
+      </div>
+    </div>
+    <div class="rank-msg" id="rankMsg"></div>
+  </div>
+
+  <div id="wrong" class="content"></div>
+
+  <div id="rank" class="content">
+    <h3>🏆 Class Ranking</h3>
+    <p>1. <b>You</b> — <span id="rankScore"></span>%</p>
+    <p>2. Officer A — 92%</p>
+    <p>3. Officer B — 86%</p>
+    <p>4. Officer C — 78%</p>
+  </div>
+</div>
+
+<script>
+// Data: Question, Options, Correct Index (0=A, 1=B, 2=C, 3=D)
+const questionSet = [
+  // UNIT I
+  ["Which molecular motion increases first when a substance approaches its ignition point?", ["Rotational", "Translational", "Vibrational", "Electronic"], 2],
+  ["The weakest link in the Fire Triangle is typically:", ["Fuel", "Heat", "Oxygen", "Chemical chain reaction"], 1],
+  ["Which extinguisher method works by lowering the kinetic energy of fuel molecules?", ["Smothering", "Starvation", "Cooling", "Inhibition"], 2],
+  ["Water cools fire primarily due to its:", ["High boiling point", "High viscosity", "Latent heat of vaporization", "High specific gravity"], 2],
+  ["The term pyrophoric refers to materials that:", ["Burn without flame", "Self-ignite in air", "React only with water", "Produce toxic fumes"], 1],
+  ["According to Indian Standards, which fire class includes live electrical fires?", ["Class A", "Class B", "Class C", "No Class (separate category)"], 3],
+  ["Halon extinguishing works mainly on:", ["Cooling", "Smothering", "Chain reaction inhibition", "Fuel dilution"], 2],
+  ["Which atom has the highest influence on exothermic reactions in hydrocarbon combustion?", ["Nitrogen", "Carbon", "Oxygen", "Hydrogen"], 3],
+  ["The conversion of molecules to free radicals during fire occurs during:", ["Incipient stage", "Growth stage", "Fully developed stage", "Decay stage"], 0],
+  ["The minimum concentration of oxygen below which fire cannot sustain is called:", ["UEL", "LEL", "LOC", "MOC"], 2],
+
+  // UNIT II
+  ["The most common cause of residential fires is:", ["Electrical faults", "Combustible metals", "Chemical spills", "Lightning"], 0],
+  ["The fire tetrahedron added the fourth component:", ["Explosive range", "Free radicals", "Chemical chain reaction", "Oxygen enrichment"], 2],
+  ["Un-inhibition chain reaction theory mainly explains:", ["Cooling effects", "Halon efficiency", "Dry powder suppression", "Oxygen reduction"], 1],
+  ["Hydrogen combustion is a classic example of which mechanism?", ["Surface combustion", "Homogeneous chain reaction", "Smoldering", "Thermal explosion"], 1],
+  ["Endothermic reactions in fire science relate primarily to:", ["Energy release", "Energy absorption", "Oxygen supply", "Molecular breakdown"], 1],
+  ["A preventive measure for electrical fire hazards is:", ["Increased humidity", "Using oversized fuses", "Earthing and grounding", "Adding nitrogen to circuits"], 2],
+  ["Which factor initiates a free radical chain reaction?", ["Cooling rate", "Heat flux", "Catalytic metals", "Oxygen displacement"], 1],
+  ["Fire spread in solids begins typically by:", ["Vaporization", "Surface oxidation", "Pyrolysis", "Auto-detonation"], 2],
+  ["A fuel-rich chain reaction moves faster because of increased:", ["Nitrogen", "Inhibitors", "Hydrocarbon density", "Radical concentration"], 3],
+  ["Tetrahedron of fire is most relevant to:", ["Dust explosions", "Smoldering fire", "Flaming combustion", "Vapor-phase combustion"], 2],
+
+  // UNIT III
+  ["Auto-ignition temperature is influenced MOST by:", ["Humidity", "Ambient pressure", "Wind speed", "Fuel color"], 1],
+  ["Flash point is defined as the minimum temperature at which vapors:", ["Sustain burning", "Burn spontaneously", "Ignite momentarily", "Form free radicals"], 2],
+  ["Flammability limits are widest in gases with:", ["High density", "Low vapor pressure", "High hydrogen content", "High carbon content"], 2],
+  ["A fuel with low specific gravity has:", ["High vapor density", "Low boiling point", "Low energy value", "High ignition resistance"], 1],
+  ["Explosive range is defined between:", ["LOC and UEL", "LEL and UEL", "Flash and fire point", "AIT and fire point"], 1],
+  ["Catalysts in combustion mainly:", ["Raise activation energy", "Lower activation energy", "Cool the flame", "Absorb heat"], 1],
+  ["Combustion rate depends heavily on:", ["Fuel color", "Surface area", "Vapor pressure", "Electrical charge"], 1],
+  ["Which combustion is generally flameless?", ["Homogeneous", "Turbulent", "Smoldering", "Diffusion"], 2],
+  ["Auto-ignition differs from flash point as it requires:", ["Heat source", "Oxygen enrichment", "No external ignition source", "Vapor dilution"], 2],
+  ["Latent heat of fusion concerns:", ["Vapor → Liquid", "Solid → Liquid", "Liquid → Vapor", "Vapor → Solid"], 1],
+
+  ["Humidity reduces fire spread mainly by:", ["Oxygen reduction", "Fuel cooling", "Fuel wetting", "Vapor dilution"], 2],
+  ["Pyrolysis temperature increases with:", ["Fuel density", "Moisture content", "Carbon chain length", "Atmospheric pressure"], 1],
+  ["Vapor density > 1 means vapor will:", ["Rise up", "Spread horizontally", "Stay near ground", "Dissipate quickly"], 2],
+  ["A fire point is always:", ["Higher than flash point", "Lower than flash point", "Same as flash point", "Unrelated to flash point"], 0],
+  ["Hydrogen flames are nearly invisible because:", ["High carbon", "High UV radiation", "Low emissivity", "High flame temperature"], 2],
+
+  // UNIT IV
+  ["A fire resistance test determines:", ["Ignition temp", "Hour rating", "Oxygen consumption", "UEL"], 1],
+  ["Calorific value is defined as heat released during:", ["Fusion", "Complete combustion", "Incomplete combustion", "Reduction"], 1],
+  ["Higher fire load means:", ["Lower burning rate", "Higher temperature potential", "Lower flame height", "Higher LOC"], 1],
+  ["Occupancy grading depends mainly on:", ["Arrival time of fire brigade", "Amount and type of fuel present", "Room height", "Color of building materials"], 1],
+  ["Flame spread test evaluates:", ["Ignition", "Heat release rate", "Horizontal/vertical propagation", "Flashover potential"], 2],
+  ["Reaction-to-fire test helps determine:", ["Toxicity of gases", "Thermal expansion", "Difficulty in extinguishing", "Smoke optical density"], 0],
+  ["Fire load density is expressed in:", ["kJ/m³", "kcal/m²", "MJ/m²", "BTU"], 2],
+  ["Fire resistance of concrete increases when:", ["Moisture decreases", "Aggregate size increases", "Steel content increases", "Density decreases"], 1],
+  ["Which factor reduces fire resistance of steel?", ["Zinc coating", "Increase in temperature", "Humidity", "Carbon reduction"], 1],
+  ["Calorific value of a material increases with:", ["Moisture", "Ash content", "Hydrocarbon content", "Density"], 2],
+
+  // UNIT V
+  ["Conduction is fastest in:", ["Liquids", "Gases", "Metals", "Plastics"], 2],
+  ["Radiation heat transfer does NOT require:", ["Medium", "Heat source", "Temperature difference", "Surface area"], 0],
+  ["BTU is used in measurement of:", ["Temperature", "Heat absorption", "Heat energy", "Combustion efficiency"], 2],
+  ["Specific heat is defined as heat required to raise:", ["1 kg by 100°C", "1 g by 1°F", "1 kg by 1°C", "1 L by 1°C"], 2],
+  ["Convection transfers heat due to:", ["Radiation waves", "Molecular vibration", "Bulk fluid movement", "Free electrons"], 2],
+  ["Spontaneous heating occurs typically due to:", ["Poor ventilation", "High moisture in fuel", "Rapid oxidation", "Low ambient temperature"], 2],
+  ["Heat flux is measured in:", ["W/m²", "J/kg", "BTU", "kcal/kg"], 0],
+  ["Conduction increases when:", ["Thickness increases", "Cross-section decreases", "Temperature gradient increases", "Thermal conductivity decreases"], 2],
+  ["Convection is maximum in:", ["Air", "Water", "Steam", "Vacuum"], 2],
+  ["Radiant heat from a fire is most dangerous due to:", ["High wavelength", "Long travel distance", "No cooling needed", "Invisible nature"], 1],
+
+  // UNIT VI
+  ["Boyle’s law is based on:", ["Constant temperature", "Constant pressure", "Constant volume", "Constant density"], 0],
+  ["Charles’s Law relates volume to:", ["Temperature", "Pressure", "Density", "Mass"], 0],
+  ["General Gas Law is combination of:", ["Dalton + Boyle", "Charles + Pressure law + Boyle", "Henry + Pascal", "Ideal gas + kinetic theory"], 1],
+  ["Thermal expansion in solids depends on:", ["Specific gravity", "Coefficient of linear expansion", "Vapor density", "Molecular mass only"], 1],
+  ["Invar metal is used because of its:", ["High expansion", "Zero expansion", "Low thermal conductivity", "Low melting point"], 1],
+  ["Sublimation occurs when solid converts to vapor without:", ["Heat input", "Liquid phase", "Pressure change", "Chemical change"], 1],
+  ["Critical temperature is the temperature above which gas cannot be:", ["Heated", "Solidified", "Liquefied by pressure", "Expanded"], 2],
+  ["Liquids expand more than solids because:", ["Higher vapor pressure", "Larger molecular gaps", "Lower hydrogen bonding", "High density"], 1],
+  ["Gas pressure increases with:", ["Lower temperature", "Larger container", "Increased molecular collision", "Reduced density"], 2],
+  ["Boyle’s law inverse relationship is due to:", ["Temperature fluctuations", "Constant volume", "Increased molecular collisions", "Constant mass"], 2],
+  ["The coefficient of cubical expansion is approximately:", ["Twice the linear coefficient", "Three times the linear coefficient", "Half the linear coefficient", "Equal to linear coefficient"], 1],
+  ["Gas volume becomes zero at:", ["-100°C", "0 K", "0°C", "-273°C (approximately)"], 3],
+  ["If pressure of a gas doubles while temperature remains constant, its volume:", ["Doubles", "Halves", "Triples", "Remains constant"], 1],
+  ["A gas becomes ideal when:", ["High pressure & high temperature", "Low pressure & high temperature", "Low pressure & low temperature", "High pressure & low temperature"], 1],
+  ["Liquids expand more than solids primarily due to:", ["Weaker intermolecular forces", "Higher density", "Lower vapor pressure", "High boiling point"], 0],
+
+  // ADVANCED MIXED
+  ["Free radicals in fire propagation are mainly produced during:", ["Cooling", "Pyrolysis", "Decay", "Smoldering"], 1],
+  ["The most important factor affecting flame height is:", ["Wind direction", "Fuel vaporization rate", "Fuel color", "Vapour density"], 1],
+  ["Materials with high thermal inertia will:", ["Heat up quickly", "Resist temperature rise", "Burn faster", "Automatically ignite"], 1],
+  ["Which fire test measures flame spread along a surface?", ["Cone calorimeter test", "ASTM E-84", "UL-94", "IS 3809"], 1],
+  ["Conduction is least effective in:", ["Steel", "Aluminum", "Air", "Copper"], 2],
+  ["Incomplete combustion usually produces large amounts of:", ["CO₂", "O₂", "CO", "Water vapor"], 2],
+  ["Maximum heat transmission in a structure during fire is usually by:", ["Convection", "Conduction", "Radiation", "Evaporation"], 2],
+  ["A substance that burns without external heating is undergoing:", ["Spontaneous ignition", "Flashover", "Thermal runaway", "Sublimation"], 0],
+  ["Which process produces flammable vapors from solid fuels?", ["Sublimation", "Pyrolysis", "Condensation", "Fusion"], 1],
+  ["The temperature at which vapor production equals flame extinguishment tendency is:", ["Flash point", "Fire point", "Boiling point", "AIT"], 1],
+  ["When a gas is compressed rapidly, its temperature increases due to:", ["Boyle's law", "Charles’ law", "Gay Lussac’s law", "Newton’s law"], 2],
+  ["Smoldering combustion is characterized by:", ["Diffusion flames", "High temperature", "Surface oxidation", "Gas-phase reactions"], 2],
+  ["A fire load calculation does NOT consider:", ["Occupancy type", "Fuel calorific value", "Fuel quantity", "Wind speed"], 3],
+  ["In fire science, the term heat release rate refers to:", ["Total heat produced", "Heat produced per unit time", "Heat required for ignition", "Heat absorbed by water"], 1],
+  ["The vapour density of methane (<1) means it:", ["Accumulates at ground level", "Rises upward", "Forms black smoke", "Cannot burn without catalyst"], 1],
+  ["The first stage of fire development is:", ["Growth", "Fully developed", "Flashover", "Incipient"], 3],
+  ["Flashover occurs mainly due to:", ["Increased humidity", "Radiant heat feedback", "Reduced oxygen", "Large fuel surface area"], 1],
+  ["Endothermic reactions in fire suppression include:", ["Combustion", "Steam generation", "Flame propagation", "Carbon deposition"], 1],
+  ["High vapor pressure of a fuel indicates:", ["Slow vaporization", "Slow ignition", "Rapid vaporization", "No reaction with oxygen"], 2],
+  ["Catalytic combustion usually occurs in:", ["Metals", "Plastics", "Dusts", "Gases"], 3],
+  
+  // TOUGH MIXED (91-100)
+  ["The ability of a material to resist heat conduction is called:", ["Thermal conductivity", "Thermal resistance", "Thermal expansion", "Thermal inertia"], 1],
+  ["A gas cools upon expansion because:", ["Molecular collisions increase", "Its density increases", "Work is done by the gas", "Vapor pressure rises"], 2],
+  ["Fire point is typically ___ higher than flash point.", ["2–5°C", "5–10°C", "10–30°C", "50°C"], 2],
+  ["Which contributes MOST to smoke generation?", ["Complete combustion", "Incomplete combustion", "High humidity", "High oxygen concentration"], 1],
+  ["Explosion hazard is highest when mixture is:", ["Below LEL", "Above UEL", "Between LEL and UEL", "At AIT"], 2],
+  ["A substance with high specific heat will:", ["Heat up rapidly", "Cool slowly", "Ignite easily", "Have low calorific value"], 1],
+  ["Thermal radiation intensity depends mainly on:", ["temperature⁴", "temperature²", "1/temperature", "1/temperature²"], 0],
+  ["The calorific value decreases if the material has high:", ["Carbon", "Hydrogen", "Ash content", "Density"], 2],
+  ["Which type of fire involves deep-seated glowing combustion?", ["Class A", "Class B", "Class C", "Class D"], 0],
+  ["Auto-ignition is more likely in:", ["High ventilation", "Moist fuel", "Insulated fuel piles", "Frozen materials"], 2]
+];
+
+const questionsData = [];
+// Process questions
+for (let q of questionSet) {
+  questionsData.push({q:q[0], a:q[1], correct:q[2]});
+}
+
+// Render Questions
+const questionsDiv = document.getElementById("questions");
+questionsData.forEach((q,i)=>{
+  let html = `<div class='question'><h3>Q${i+1}. ${q.q}</h3>`;
+  q.a.forEach((opt,idx)=>{
+    html += `<label><input type='radio' name='q${i}' value='${idx}'> ${opt}</label>`;
+  });
+  html += "</div>";
+  questionsDiv.innerHTML += html;
+});
+
+// Timer Logic
+let seconds = 0;
+const timerEl = document.getElementById("floatingTimer");
+const timerInterval = setInterval(()=>{
+  seconds++;
+  const h = String(Math.floor(seconds/3600)).padStart(2,'0');
+  const m = String(Math.floor((seconds%3600)/60)).padStart(2,'0');
+  const s = String(seconds%60).padStart(2,'0');
+  timerEl.textContent = `⏱️ ${h}:${m}:${s}`;
+},1000);
+
+// Submission Logic
+document.getElementById("examForm").addEventListener("submit", (e)=>{
+  e.preventDefault();
+  clearInterval(timerInterval);
+  const total = questionsData.length;
+  let correct = 0;
+  const wrongList = document.getElementById("wrong");
+  wrongList.innerHTML = "<h3>❌ Review Incorrect Answers</h3>";
+  
+  questionsData.forEach((q,i)=>{
+    const ans = document.querySelector(`input[name='q${i}']:checked`);
+    if(ans && parseInt(ans.value) === q.correct) {
+      correct++;
+    } else {
+      const yourAns = ans ? q.a[parseInt(ans.value)] : "Not Answered";
+      wrongList.innerHTML += `
+        <div class="wrong-item">
+          <strong>Question ${i+1}: ${q.q}</strong>
+          <span class="user-ans">Your Answer: ${yourAns}</span><br>
+          <span class="correct-ans">✅ Correct Answer: ${q.a[q.correct]}</span>
+        </div>`;
+    }
+  });
+
+  const percent = Math.round((correct/total)*100);
+  document.getElementById("scorePercent").innerText = percent + "%";
+  document.getElementById("scoreValue").innerText = `${correct}/${total}`;
+  document.getElementById("timeTaken").innerText = `${Math.floor(seconds/60)}m ${seconds%60}s`;
+  document.getElementById("rankScore").innerText = percent;
+  
+  let msg = "";
+  if(percent >= 90) msg = "Outstanding! You are a true Fire Safety Expert! 🔥";
+  else if(percent >= 75) msg = "Great job! Your concepts are very clear. ✅";
+  else if(percent >= 50) msg = "Good effort. Review the specific heat and gas laws sections. 📚";
+  else msg = "Keep studying! Focus on the Fire Triangle and Heat Transmission. ⚠️";
+  
+  document.getElementById("rankMsg").innerText = msg;
+  document.getElementById("exam").style.display = "none";
+  document.getElementById("floatingTimer").style.display = "none";
+  document.getElementById("resultPage").style.display = "block";
+  window.scrollTo(0,0);
+});
+
+function openTab(evt, tabName) {
+  document.querySelectorAll(".content").forEach(c => c.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById(tabName).classList.add("active");
+  evt.currentTarget.classList.add("active");
+}
+</script>
+</body>
 </html>
